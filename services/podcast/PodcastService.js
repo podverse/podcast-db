@@ -22,15 +22,39 @@ class PodcastService extends SequelizeService {
   get (id, params={}) {
     const {Episode} = this.Models;
 
-    // Retrieve podcast and its episode ids and titles only
-    params.sequelize = {
-      include: [{
-        model: Episode,
-        attributes: ['id', 'title', 'mediaURL', 'pubDate']
-      }]
+    if (typeof params.feedURL !== 'undefined' && params.feedURL.length > 0) {
+
+      params.sequelize = {
+        attributes: ['id', 'feedURL', 'title'],
+        where: {
+          feedURL: params.feedURL
+        },
+        include: [{
+          model: Episode,
+          attributes: ['id', 'title', 'mediaURL', 'pubDate']
+        }]
+      }
+
+      return this.Model.findOne({
+        where: {
+          feedURL: params.feedURL,
+        }
+      }).then(podcast => {
+        return podcast;
+      });
+
+    } else {
+      // Retrieve podcast and its episode ids and titles only
+      params.sequelize = {
+        include: [{
+          model: Episode,
+          attributes: ['id', 'title', 'mediaURL', 'pubDate']
+        }]
+      }
+
+      return super.get(id, params);
     }
 
-    return super.get(id, params);
   }
 
   find (params={}) {

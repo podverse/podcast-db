@@ -8,7 +8,6 @@ module.exports = function(sequelize, DataTypes) {
 
   const episode = sequelize.define('episode', {
 
-
     id: {
       type: DataTypes.UUID,
       defaultValue: DataTypes.UUIDV1,
