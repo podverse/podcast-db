@@ -1,0 +1,38 @@
+{
+  "name": ";podcast-db",
+  "version": "1.0.0",
+  "description": "Podcast database and feed parsing routines",
+  "main": "index.js",
+  "scripts": {
+    "start": "node app.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/podverse/podverse-feedparser.git"
+  },
+  "keywords": [
+    "podcast",
+    "episode",
+    "RSS",
+    "Atom",
+    "feed",
+    "parser",
+    "feedparser",
+    "database",
+    "db",
+    "sequelize",
+    "podverse"
+  ],
+  "author": "",
+  "license": "AGPL-3.0",
+  "bugs": {
+    "url": "https://github.com/podverse/podverse-feedparser/issues"
+  },
+  "homepage": "https://github.com/podverse/podverse-feedparser#readme",
+  "dependencies": {
+    "pg": "^6.1.2",
+    "pg-hstore": "^2.3.2",
+    "podverse-web": "git+https://github.com/podverse/podverse-web.git"
+  }
+}
