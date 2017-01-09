@@ -78,8 +78,6 @@ class PodcastService extends SequelizeService {
           feedURL: params.query.feedURL
         }
       }
-    } else {
-      throw new errors.GeneralError(`You must provide a search query.`)
     }
 
     return super.find(params);

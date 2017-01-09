@@ -190,7 +190,10 @@ function pruneEpisode(ep) {
   if (ep.image && ep.image.url) { prunedEpisode.imageURL = ep.image.url }
   if (ep.title) { prunedEpisode.title = ep.title }
   if (ep.description) { prunedEpisode.summary = ep.description }
-  if (ep.duration) { prunedEpisode.duration } // TODO: does node-feedparser give us access to itunes:duration?
+
+  // TODO: does node-feedparser give us access to itunes:duration?
+  // Seems like it doesn't...
+  if (ep.duration) { prunedEpisode.duration }
   if (ep.link) { prunedEpisode.link = ep.link }
   if (ep.enclosures && ep.enclosures[0]) {
     if (ep.enclosures[0].length) { prunedEpisode.mediaBytes = ep.enclosures[0].length }
