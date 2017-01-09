@@ -1,11 +1,10 @@
 {
-  "name": ";podcast-db",
+  "name": "podcast-db",
   "version": "1.0.0",
   "description": "Podcast database and feed parsing routines",
   "main": "index.js",
   "scripts": {
-    "start": "node app.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "node scripts/test.js"
   },
   "repository": {
     "type": "git",
@@ -34,5 +33,10 @@
     "pg": "^6.1.2",
     "pg-hstore": "^2.3.2",
     "podverse-web": "git+https://github.com/podverse/podverse-web.git"
+  },
+  "devDependencies": {
+    "chai": "^3.5.0",
+    "is-ci": "^1.0.10",
+    "mocha": "^3.2.0"
   }
 }
