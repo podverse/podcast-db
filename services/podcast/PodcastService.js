@@ -62,13 +62,10 @@ class PodcastService extends SequelizeService {
 
     // Fuzzy match search for podcasts by title
     if (typeof params.query !== 'undefined' && typeof params.query.title !== 'undefined' && params.query.title.length > 0) {
+      let title = params.query.title || '';
       params.sequelize = {
         attributes: ['id', 'feedURL', 'title'],
-        where: {
-          title: {
-            $like: '%' + params.query.title + '%'
-          }
-        }
+        where: ['title ILIKE ?', '%' + title + '%']
       }
     // Search for podcast by feedURL
     } else if (typeof params.query !== 'undefined' && typeof params.query.feedURL !== 'undefined' && params.query.feedURL.length > 0) {
