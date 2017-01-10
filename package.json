@@ -30,8 +30,12 @@
   },
   "homepage": "https://github.com/podverse/podverse-feedparser#readme",
   "dependencies": {
+    "feathers-errors": "^2.5.0",
+    "feathers-sequelize": "^1.4.0",
+    "feedparser": "^2.0.0",
     "pg": "^6.1.2",
     "pg-hstore": "^2.3.2",
+    "request": "^2.79.0",
     "sequelize": "^3.29.0",
     "sequelize-import": "^1.2.1"
   },

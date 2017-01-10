@@ -5,7 +5,6 @@ const
     errors = require('feathers-errors'),
     {postgresUri} = require('../../config');
 
-
 class PodcastService extends SequelizeService {
 
   constructor () {
