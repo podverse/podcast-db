@@ -32,7 +32,8 @@
   "dependencies": {
     "pg": "^6.1.2",
     "pg-hstore": "^2.3.2",
-    "podverse-web": "git+https://github.com/podverse/podverse-web.git"
+    "sequelize": "^3.29.0",
+    "sequelize-import": "^1.2.1"
   },
   "devDependencies": {
     "chai": "^3.5.0",
