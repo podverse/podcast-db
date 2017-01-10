@@ -3,11 +3,12 @@ const
     request = require('request'),
     errors = require('feathers-errors'),
     sqlEngineFactory = require('../repositories/sequelize/engineFactory.js'),
-    modelFactory = require('../repositories/sequelize/models');
+    modelFactory = require('../repositories/sequelize/models'),
+    {postgresUri} = require('../config');
 
 
 // TODO: I DON'T THINK THIS SHOULD BE HARDCODED HERE...
-const sqlEngine = new sqlEngineFactory({uri: 'postgres://postgres:password@127.0.0.1:5432/podverse'});
+const sqlEngine = new sqlEngineFactory({uri: postgresUri});
 const Models = modelFactory(sqlEngine);
 
 // If the podcast's lastBuildDate stored in the db is older than the lastBuildDate
@@ -53,7 +54,7 @@ function parseFeed (feedURL, shouldParseEpisodes) {
       let stream = this;
 
       if (res.statusCode != 200) {
-        return this.emit('error', new Error('Bad status code'));
+        return this.emit('error', new errors.GeneralError('Bad status code'));
       }
 
       stream.pipe(feedParser);

@@ -4,7 +4,7 @@
   "description": "Podcast database and feed parsing routines",
   "main": "index.js",
   "scripts": {
-    "test": "node scripts/test.js"
+    "test": "NODE_ENV=test_db node scripts/test.js"
   },
   "repository": {
     "type": "git",

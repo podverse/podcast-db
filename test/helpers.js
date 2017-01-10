@@ -1,13 +1,13 @@
 const
     SqlEngine = require('../src/repositories/sequelize/engineFactory'),
-    registerModels = require('../src/repositories/sequelize/models');
+    registerModels = require('../src/repositories/sequelize/models'),
+    {postgresUri} = require('../src/config');
 
 
 function configureDatabaseModels (resolve) {
 
   beforeEach(function (done) {
-    // TODO: how can we test PostgreSQL instead of memory?
-    this._sqlEngine = new SqlEngine({storagePath: ':memory:'});
+    this._sqlEngine = new SqlEngine({uri: postgresUri});
     const Models = registerModels(this._sqlEngine);
 
     this._sqlEngine.sync()

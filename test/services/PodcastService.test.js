@@ -1,7 +1,7 @@
 const
     {configureDatabaseModels, createTestPodcastAndEpisode} = require('../helpers.js'),
-    EpisodeService = require('../../src/services/episode/EpisodeService.js');
-    
+    PodcastService = require('../../src/services/podcast/PodcastService.js');
+
 describe('PodcastService', function () {
 
   configureDatabaseModels(function (Models) {

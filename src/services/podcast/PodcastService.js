@@ -2,15 +2,14 @@ const
     sqlEngineFactory = require('../../repositories/sequelize/engineFactory.js'),
     modelFactory = require('../../repositories/sequelize/models'),
     SequelizeService = require('feathers-sequelize').Service,
-    {locator} = require('locator.js'),
-    errors = require('feathers-errors');
+    errors = require('feathers-errors'),
+    {postgresUri} = require('../../config');
 
 
 class PodcastService extends SequelizeService {
 
   constructor () {
-    // TODO: I DON'T THINK THIS SHOULD BE HARDCODED HERE...
-    const sqlEngine = new sqlEngineFactory({uri: 'postgres://postgres:password@127.0.0.1:5432/podverse'});
+    const sqlEngine = new sqlEngineFactory({uri: postgresUri});
     const Models = modelFactory(sqlEngine);
 
     super({

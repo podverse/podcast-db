@@ -10,7 +10,6 @@ describe('EpisodeService', function () {
 
   beforeEach(function (done) {
     this.episodeSvc = new EpisodeService();
-
     createTestPodcastAndEpisode(this.Models)
       .then(([podcasts, episodes]) => {
         this.episode = episodes[0];
