@@ -30,6 +30,7 @@
   },
   "homepage": "https://github.com/podverse/podverse-feedparser#readme",
   "dependencies": {
+    "aws-sdk": "^2.7.21",
     "feathers-errors": "^2.5.0",
     "feathers-sequelize": "^1.4.0",
     "feedparser": "^2.0.0",

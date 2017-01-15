@@ -11,6 +11,19 @@ const
 const sqlEngine = new sqlEngineFactory({uri: postgresUri});
 const Models = modelFactory(sqlEngine);
 
+function queryForFeedsThenParse () {
+  let {Podcast} = Models;
+
+  return Podcast.findAll({
+    attributes: ['feedURL']
+  })
+  .then(podcasts => {
+    for (podcast of podcasts) {
+      console.log(podcast.feedURL)
+    }
+  })
+}
+
 // If the podcast's lastBuildDate stored in the db is older than the lastBuildDate
 // in the feed, then parse the full feed.
 function parseFullFeedIfFeedHasBeenUpdated (feedURL) {
@@ -19,12 +32,13 @@ function parseFullFeedIfFeedHasBeenUpdated (feedURL) {
     where: {
       feedURL: feedURL
     },
-    attributes: ['lastBuildDate']
+    attributes: ['lastBuildDate', 'lastPubDate']
   })
   .then(podcast => {
+
     parseFeed(feedURL, false)
       .then(parsedFeedObj => {
-        if (!podcast || !podcast.lastBuildDate || parsedFeedObj.date > podcast.lastBuildDate) {
+        if (!podcast || (podcast.lastBuildDate && parsedFeedObj.podcast.date > podcast.lastBuildDate) || (podcast.lastPubDate && parsedFeedObj.podcast.pubdate > podcast.lastPubDate) || (!podcast.lastBuildDate && !podcast.lastPubDate) ) {
           parseFeed(feedURL, true)
             .then(fullParsedFeedObj => {
               saveParsedFeedToDatabase(fullParsedFeedObj);
@@ -208,5 +222,6 @@ function pruneEpisode(ep) {
 module.exports = {
   parseFeed,
   parseFullFeedIfFeedHasBeenUpdated,
+  queryForFeedsThenParse,
   saveParsedFeedToDatabase
 }
