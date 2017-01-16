@@ -50,7 +50,7 @@ describe('feedParser', function () {
     describe('when a valid RSS URL is provided', function () {
 
       beforeEach(function (done) {
-        feedParser.parseFeed('http://localhost:1234/localFeed', true)
+        feedParser.parseFeed('http://localhost:1234/localFeed', {shouldParseMaxEpisodes: true})
           .then(parsedFeedObj => {
             this.parsedFeedObj = parsedFeedObj;
             done();

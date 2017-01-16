@@ -363,5 +363,7 @@ module.exports = {
   addFeedUrlsToSQSParsingQueue,
   parseNextFeedFromQueue,
   purgeSQSFeedQueue,
-  parseFeedIfHasBeenUpdated
+  parseFeed,
+  parseFeedIfHasBeenUpdated,
+  saveParsedFeedToDatabase
 }
