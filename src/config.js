@@ -7,4 +7,6 @@ if (process.env.NODE_ENV === 'test_db' && !isCi) {
   config.postgresUri = 'postgres://postgres:password@127.0.0.1:5432/postgres';
 }
 
+config.queueUrl = '';
+
 module.exports = config;
