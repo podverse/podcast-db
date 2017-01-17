@@ -19,10 +19,8 @@ Do a max parse (with a limit of ~1000 episodes) once a week.
 Always run the parseNextFeedFromQueue script every 5 minutes.
 
 ````
-00 */12 * * 1-6 /usr/local/bin/node <pwd>/scripts/addFeedsToBeParsedForRecentEpisodes.js
-* 0 * * 7 /usr/local/bin/node <pwd>/scripts/addFeedsToBeParsedForMaxEpisodes.js
-* 12 * * 7 /usr/local/bin/node <pwd>/scripts/addFeedsToBeParsedForRecentEpisodes.js
-*/5 * * * * /usr/local/bin/node <pwd>/scripts/parseNextFeedFromQueue.js
-59 23 * * * /usr/local/bin/node <pwd>/scripts/purgeSQSFeedQueue.js
-59 11 * * * /usr/local/bin/node <pwd>/scripts/purgeSQSFeedQueue.js
+00 */12 * * 1-6 /usr/local/bin/node /Users/mitch/repos/podcast-db/scripts/addFeedsToBeParsedForRecentEpisodes.js
+* 0 * * 7 /usr/local/bin/node /Users/mitch/repos/podcast-db/scripts/addFeedsToBeParsedForMaxEpisodes.js
+* 12 * * 7 /usr/local/bin/node /Users/mitch/repos/podcast-db/scripts/addFeedsToBeParsedForRecentEpisodes.js
+*/5 * * * * /usr/local/bin/node /Users/mitch/repos/podcast-db/scripts/parseNextFeedFromQueue.js
 ````
