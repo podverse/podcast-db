@@ -37,7 +37,7 @@ function parseFeedIfHasBeenUpdated (feedURL, params = {}) {
           if (!podcast || (podcast.lastBuildDate && parsedFeedObj.podcast.date > podcast.lastBuildDate) || (podcast.lastPubDate && parsedFeedObj.podcast.pubdate > podcast.lastPubDate) || (!podcast.lastBuildDate && !podcast.lastPubDate)) {
             parseFeed(feedURL, params)
               .then(fullParsedFeedObj => {
-                saveParsedFeedToDatabase(fullParsedFeedObj, params, res, rej);
+                saveParsedFeedToDatabase(fullParsedFeedObj, res, rej);
               })
               .catch(err => {
                 console.log(parsedFeedObj.podcast.title);
@@ -61,15 +61,15 @@ function parseFeedIfHasBeenUpdated (feedURL, params = {}) {
 
 function parseFeed (feedURL, params = {}) {
 
-  return new Promise ((res, rej) => {
+  return new Promise ((resolve, reject) => {
 
     const feedParser = new FeedParser([]),
           req = request(feedURL);
 
-    req.on('response', function (res) {
+    req.on('response', function (response) {
       let stream = this;
 
-      if (res.statusCode != 200) {
+      if (response.statusCode != 200) {
         return this.emit('error', new errors.GeneralError('Bad status code'));
       }
 
@@ -120,29 +120,28 @@ function parseFeed (feedURL, params = {}) {
       });
     }
 
-    feedParser.on('error', done);
+    req.on('error', function (e) {
+      console.log(e);
+      reject(e);
+    });
+
     feedParser.on('end', done);
 
-    function done (e) {
-      if (e) {
-        console.log(feedURL);
-        rej(e);
-      }
-
+    function done () {
       if (!podcastObj.xmlurl) {
         podcastObj.xmlurl = feedURL;
       }
 
       parsedFeedObj.podcast = podcastObj;
       parsedFeedObj.episodes = episodeObjs;
-      res(parsedFeedObj);
+      resolve(parsedFeedObj);
     }
 
   });
 
 }
 
-function saveParsedFeedToDatabase (parsedFeedObj, params = {}, res, rej) {
+function saveParsedFeedToDatabase (parsedFeedObj, res, rej) {
 
   const {Episode, Podcast} = Models;
 

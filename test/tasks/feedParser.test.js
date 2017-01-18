@@ -33,7 +33,7 @@ describe('feedParser', function () {
     describe('when an invalid RSS URL is provided', function () {
 
       beforeEach(function (done) {
-        feedParser.parseFeed('http://www.podverse.fm/fakepage', true)
+        feedParser.parseFeed('http://www.podverse.fm/fakepage', {shouldParseMaxEpisodes: true})
           .then(done)
           .catch(err => {
             this.err = err;
@@ -76,21 +76,24 @@ describe('feedParser', function () {
         })
 
         beforeEach(function (done) {
-          feedParser.saveParsedFeedToDatabase(this.parsedFeedObj)
-            .then(() => {
-              return this.Models.Podcast.findOne({where: {title: 'The Joe Rogan Experience'}})
-                .then(podcast => {
-                  this.podcast = podcast;
-                  this.podcastId = podcast.id;
-                });
-            })
-            .then(() => {
-              return this.Models.Episode.findAll({where: {podcastId: this.podcastId}})
-                .then(episodes => {
-                  this.episodes = episodes;
-                  done();
-                });
-            });
+          let resolve = () => { return };
+          let reject = () => { return };
+            feedParser.saveParsedFeedToDatabase(this.parsedFeedObj, resolve, reject)
+              .then(() => {
+                return this.Models.Podcast.findOne({where: {title: 'The Joe Rogan Experience'}})
+                  .then(podcast => {
+                    this.podcast = podcast;
+                    this.podcastId = podcast.id;
+                  });
+              })
+              .then(() => {
+                return this.Models.Episode.findAll({where: {podcastId: this.podcastId}})
+                  .then(episodes => {
+                    this.episodes = episodes;
+                    done();
+                  });
+              });
+
         });
 
         it('the podcast is saved', function () {
