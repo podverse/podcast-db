@@ -40,6 +40,35 @@ class EpisodeService extends SequelizeService {
 
   }
 
+  findOrCreateEpisode(episode, podcastId) {
+    return this.Model.findOrCreate({
+      where: {
+        mediaURL: episode.mediaURL
+      },
+      defaults: Object.assign({}, episode, {
+        podcastId: podcastId
+      })
+    })
+    .then(() => {
+      return this.Model.upsert({
+        mediaURL: episode.mediaURL,
+        imageURL: episode.imageURL,
+        title: episode.title,
+        summary: episode.summary,
+        duration: episode.duration,
+        link: episode.link,
+        mediaBytes: episode.mediaBytes,
+        mediaType: episode.mediaType,
+        pubDate: episode.pubDate
+      })
+    })
+    .catch(err => {
+      console.log(err);
+      console.log(episode.title);
+      console.log(episode.mediaURL);
+    })
+  }
+
 }
 
 EpisodeService.prototype.create = undefined;

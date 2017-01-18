@@ -7,11 +7,18 @@ const
     {deleteSQSMessage} = require('./sqsQueueDeleteMessage'),
     {postgresUri} = require('../config');
 
+let PodcastService = require('../services/podcast/PodcastService.js'),
+    EpisodeService = require('../services/episode/EpisodeService.js');
+
+PodcastService = new PodcastService();
+EpisodeService = new EpisodeService();
+
 const sqlEngine = new sqlEngineFactory({uri: postgresUri});
 const Models = modelFactory(sqlEngine);
 
-// If the podcast's last pubDate or buildDate stored in the db is older than the lastBuildDate
-// in the feed, then parse the full feed. If the podcast doesn't exist, parse it.
+// If the podcast's last pubDate or buildDate stored in the db is older than the
+// last buildDate or last pubDate in the feed's, then parse the full feed.
+// If the podcast doesn't exist, parse it.
 // If the podcast exists but doesn't have a pubDate or buildDate, parse it.
 function parseFeedIfHasBeenUpdated (feedURL, params = {}) {
   let {Podcast} = Models;
@@ -39,6 +46,9 @@ function parseFeedIfHasBeenUpdated (feedURL, params = {}) {
       });
 
   })
+  .catch(err => {
+    console.log(err)
+  });
 
 }
 
@@ -131,6 +141,7 @@ function parseFeed (feedURL, params = {}) {
 }
 
 function saveParsedFeedToDatabase (parsedFeedObj, params = {}) {
+
   const {Episode, Podcast} = Models;
 
   let podcast = parsedFeedObj.podcast;
@@ -140,68 +151,29 @@ function saveParsedFeedToDatabase (parsedFeedObj, params = {}) {
   // to overload the database
   episodes = episodes.slice(0, 2000);
 
-  return Podcast.findOrCreate({
-    where: {
-      feedURL: podcast.xmlurl
-    }
-  })
-  .then((podcastArray) => {
-    podcast.id = podcastArray[0].id;
+  return PodcastService.findOrCreatePodcast(podcast)
+    .then(() => {
 
-    return Podcast.upsert({
-      feedURL: podcast.xmlurl,
-      imageURL: podcast.image.url, // node-feedparser supports image, itunes:image media:image, etc.,
-      summary: podcast.description,
-      title: podcast.title,
-      author: podcast.author,
-      lastBuildDate: podcast.date,
-      lastPubDate: podcast.pubdate
-    });
-  })
-  .then(() => {
-
-    return promiseChain = episodes.reduce((promise, ep) => {
-
-      if (!ep.enclosures || !ep.enclosures[0] || !ep.enclosures[0].url) {
-        return promise
-      }
-
-      return promise.then(() => {
-        return Episode.findOrCreate({
-          where: {
-            mediaURL: ep.enclosures[0].url
-          },
-          defaults: Object.assign({}, pruneEpisode(ep), {
-            podcastId: podcast.id
-          })
-        })
-        .then(() => {
+      return promiseChain = episodes.reduce((promise, ep) => {
+        if (!ep.enclosures || !ep.enclosures[0] || !ep.enclosures[0].url) {
+          return promise
+        }
+        return promise.then(() => {
           let prunedEpisode = pruneEpisode(ep);
-          return Episode.upsert({
-            mediaURL: ep.enclosures[0].url,
-            imageURL: prunedEpisode.imageURL,
-            title: prunedEpisode.title,
-            summary: prunedEpisode.summary,
-            duration: prunedEpisode.duration,
-            link: prunedEpisode.link,
-            mediaBytes: prunedEpisode.mediaBytes,
-            mediaType: prunedEpisode.mediaType,
-            pubDate: prunedEpisode.pubDate
-          })
+          return EpisodeService.findOrCreateEpisode(prunedEpisode, podcast.id);
         })
-      })
-      .catch(e => {
-        throw new errors.GeneralError(e);
-      });
-    }, Promise.resolve());
+        .catch(e => {
+          throw new errors.GeneralError(e);
+        });
+      }, Promise.resolve());
 
-  })
-  .catch((e) => {
-    throw new errors.GeneralError(e);
-  })
-  .finally(() => {
-    deleteSQSMessage(params)
-  });
+    })
+    .catch((e) => {
+      throw new errors.GeneralError(e);
+    })
+    .finally(() => {
+      deleteSQSMessage(params)
+    });
 
 }
 
@@ -214,6 +186,7 @@ function pruneEpisode(ep) {
   if (ep.duration) { prunedEpisode.duration }
   if (ep.link) { prunedEpisode.link = ep.link }
   if (ep.enclosures && ep.enclosures[0]) {
+    if (ep.enclosures[0].url) { prunedEpisode.mediaURL = ep.enclosures[0].url }
     if (ep.enclosures[0].length) { prunedEpisode.mediaBytes = ep.enclosures[0].length }
     if (ep.enclosures[0].type) { prunedEpisode.mediaType = ep.enclosures[0].type }
   }

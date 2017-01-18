@@ -78,6 +78,32 @@ class PodcastService extends SequelizeService {
     return super.find(params);
   }
 
+  findOrCreatePodcast (podcast) {
+    return this.Model.findOrCreate({
+      where: {
+        feedURL: podcast.xmlurl
+      }
+    })
+    .then((podcastArray) => {
+      podcast.id = podcastArray[0].id;
+
+      return this.Model.upsert({
+        feedURL: podcast.xmlurl,
+        imageURL: podcast.image.url,
+        summary: podcast.description,
+        title: podcast.title,
+        author: podcast.author,
+        lastBuildDate: podcast.date,
+        lastPubDate: podcast.pubdate
+      });
+    })
+    .catch(err => {
+      console.log(err);
+      console.log(podcast.title);
+      console.log(podcast.xmlurl);
+    })
+  }
+
 }
 
 PodcastService.prototype.update = undefined;
