@@ -11,129 +11,126 @@ const Models = modelFactory(sqlEngine);
 aws.config.update({region:'us-west-2'});
 const sqs = new aws.SQS();
 
-function addFeedUrlsToSQSParsingQueue (params = {}) {
+function addFeedUrlsToSQSParsingQueue(params = {}) {
 
   return new Promise((resolve, reject) => {
     purgeSQSFeedQueue(resolve, reject)
   })
-  .then(() => {
-    let {Podcast} = Models;
+    .then(() => {
+      let {Podcast} = Models;
 
-    return Podcast.findAll({
-      attributes: ['feedURL']
-    })
-    .then(podcasts => {
+      return Podcast.findAll({
+        attributes: ['feedURL']
+      })
+        .then(podcasts => {
 
-      let feedUrls = [];
-      for (podcast of podcasts) {
-        feedUrls.push(podcast.feedURL);
-      }
+          let feedUrls = [];
+          for (podcast of podcasts) {
+            feedUrls.push(podcast.feedURL);
+          }
 
-      // AWS SQS can has a max of 10 messages per batch message. This code breaks
-      // the feedURLs into chunks of 10, then calls the send batch message
-      // operation once for each of those chunks of 10.
-      let entryChunks = [];
-      let tempChunk = [];
+          // AWS SQS has a max of 10 messages per batch message. This code breaks
+          // the feedURLs into chunks of 10, then calls the send batch message
+          // operation once for each of those chunks of 10.
+          let entryChunks = [];
+          let tempChunk = [];
 
-      for (let [index, feedUrl] of feedUrls.entries()) {
-        let entry = {
-          Id: String(index),
-          MessageBody: feedUrl,
-          MessageAttributes: {
-            'shouldParseRecentEpisodes': {
-              DataType: 'Number',
-              StringValue: params.shouldParseRecentEpisodes ? '1' : '0'
-            },
-            'shouldParseMaxEpisodes': {
-              DataType: 'Number',
-              StringValue: params.shouldParseMaxEpisodes ? '1' : '0'
+          for (let [index, feedUrl] of feedUrls.entries()) {
+            let entry = {
+              Id: String(index),
+              MessageBody: feedUrl,
+              MessageAttributes: {
+                'shouldParseRecentEpisodes': {
+                  DataType: 'Number',
+                  StringValue: params.shouldParseRecentEpisodes ? '1' : '0'
+                },
+                'shouldParseMaxEpisodes': {
+                  DataType: 'Number',
+                  StringValue: params.shouldParseMaxEpisodes ? '1' : '0'
+                }
+              }
+            }
+
+            tempChunk.push(entry);
+
+            if ((index + 1) % 10 === 0 || index === feedUrls.length - 1) {
+              entryChunks.push(tempChunk);
+              tempChunk = [];
             }
           }
-        }
 
-        tempChunk.push(entry);
+          for (entryChunk of entryChunks) {
+            let chunkParams = {
+              Entries: entryChunk,
+              QueueUrl: queueUrl
+            }
 
-        if ((index + 1) % 10 === 0  || index === feedUrls.length - 1) {
-          entryChunks.push(tempChunk);
-          tempChunk = [];
-        }
-      }
-
-      for (entryChunk of entryChunks) {
-        let chunkParams = {
-          Entries: entryChunk,
-          QueueUrl: queueUrl
-        }
-
-        sqs.sendMessageBatch(chunkParams, (err, data) => {
-          if (err) {
-            console.log(err, err.stack);
-          } else {
-            console.log(data);
+            sqs.sendMessageBatch(chunkParams, (err, data) => {
+              if (err) {
+                console.log(err, err.stack);
+              }
+            });
           }
-        });
-      }
 
+        })
     })
-  })
-  .catch((err) => {
-    console.log(err);
-  })
+    .catch((err) => {
+      console.log(err);
+    });
 
 }
 
 function parseNextFeedFromQueue () {
-  let params = {
-    QueueUrl: queueUrl,
-    MessageAttributeNames: ['All'],
-    VisibilityTimeout: 300
-  }
-
-  sqs.receiveMessage(params, (err, data) => {
-    if (err) {
-      console.log(err);
+  return new Promise((resolve, reject) => {
+    let params = {
+      QueueUrl: queueUrl,
+      MessageAttributeNames: ['All'],
+      VisibilityTimeout: 300
     }
 
-    if (!data.Messages || data.Messages.length < 1) {
-      console.log('No messages returned.')
-      return;
-    }
-
-    let parseParams = {};
-    let message = data.Messages[0];
-
-    parseParams.ReceiptHandle = message.ReceiptHandle;
-
-    if (message.MessageAttributes) {
-      let msgAttrs = message.MessageAttributes;
-      if (msgAttrs.shouldParseRecentEpisodes && msgAttrs.shouldParseRecentEpisodes.StringValue) {
-        parseParams.shouldParseRecentEpisodes = parseInt(msgAttrs.shouldParseRecentEpisodes.StringValue) === 1 ? true : false;
+    sqs.receiveMessage(params, (err, data) => {
+      if (err) {
+        reject(err);
+        return;
       }
-      if (msgAttrs.shouldParseMaxEpisodes && msgAttrs.shouldParseMaxEpisodes.StringValue) {
-        parseParams.shouldParseMaxEpisodes = parseInt(msgAttrs.shouldParseMaxEpisodes.StringValue) === 1 ? true : false;
+
+      if (!data.Messages || data.Messages.length < 1) {
+        reject('No messages returned.');
+        return;
       }
-    }
 
-    let feedUrl = message.Body;
+      let parseParams = {};
+      let message = data.Messages[0];
+      let receiptHandle = message.ReceiptHandle;
 
-    parseFeedIfHasBeenUpdated(feedUrl, parseParams)
-  })
+      if (message.MessageAttributes) {
+        let msgAttrs = message.MessageAttributes;
+        if (msgAttrs.shouldParseRecentEpisodes && msgAttrs.shouldParseRecentEpisodes.StringValue) {
+          parseParams.shouldParseRecentEpisodes = parseInt(msgAttrs.shouldParseRecentEpisodes.StringValue) === 1 ? true : false;
+        }
+        if (msgAttrs.shouldParseMaxEpisodes && msgAttrs.shouldParseMaxEpisodes.StringValue) {
+          parseParams.shouldParseMaxEpisodes = parseInt(msgAttrs.shouldParseMaxEpisodes.StringValue) === 1 ? true : false;
+        }
+      }
+
+      let feedUrl = message.Body;
+
+      resolve([feedUrl, parseParams, receiptHandle])
+    });
+
+  });
 }
 
-function deleteSQSMessage (params = {}) {
-  // If there is a ReceiptHandle, then the feed was parsed from SQS, and we
-  // need to delete the SQS message.
-  if (params.ReceiptHandle) {
-    let sqsParams = {
+function deleteSQSMessage (receiptHandle) {
+  if (receiptHandle) {
+    let params = {
       QueueUrl: queueUrl,
-      ReceiptHandle: params.ReceiptHandle
+      ReceiptHandle: receiptHandle
     };
 
-    sqs.deleteMessage(sqsParams, (err, data) => {
+    sqs.deleteMessage(params, (err, data) => {
       if (err) {
         console.log(err);
-      } else {
-        console.log(data);
       }
     })
   }
@@ -147,9 +144,10 @@ function purgeSQSFeedQueue (resolve, reject) {
   sqs.purgeQueue(params, (err, data) => {
     if (err) {
       reject(err);
-    } else {
-      resolve(data);
+      return;
     }
+
+    resolve();
   });
 }
 

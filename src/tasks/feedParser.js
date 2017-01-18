@@ -21,33 +21,40 @@ const Models = modelFactory(sqlEngine);
 // If the podcast doesn't exist, parse it.
 // If the podcast exists but doesn't have a pubDate or buildDate, parse it.
 function parseFeedIfHasBeenUpdated (feedURL, params = {}) {
-  let {Podcast} = Models;
 
-  return Podcast.findOne({
-    where: {
-      feedURL: feedURL
-    },
-    attributes: ['lastBuildDate', 'lastPubDate']
-  })
-  .then(podcast => {
-    parseFeed(feedURL) // Without params, parseFeed will return podcast info but will not parse episodes
-      .then(parsedFeedObj => {
-        if (!podcast || (podcast.lastBuildDate && parsedFeedObj.podcast.date > podcast.lastBuildDate) || (podcast.lastPubDate && parsedFeedObj.podcast.pubdate > podcast.lastPubDate) || (!podcast.lastBuildDate && !podcast.lastPubDate)) {
-          parseFeed(feedURL, params)
-            .then(fullParsedFeedObj => {
-              saveParsedFeedToDatabase(fullParsedFeedObj, params);
-            })
-            .catch(err => {
-              throw new errors.GeneralError(err);
-            })
-        } else {
-          deleteSQSMessage(params);
-        }
-      });
+  return new Promise ((res, rej) => {
 
-  })
-  .catch(err => {
-    console.log(err)
+    let {Podcast} = Models;
+    return Podcast.findOne({
+      where: {
+        feedURL: feedURL
+      },
+      attributes: ['lastBuildDate', 'lastPubDate']
+    })
+    .then(podcast => {
+      parseFeed(feedURL) // Without params, parseFeed will return podcast info but will not parse episodes
+        .then(parsedFeedObj => {
+          if (!podcast || (podcast.lastBuildDate && parsedFeedObj.podcast.date > podcast.lastBuildDate) || (podcast.lastPubDate && parsedFeedObj.podcast.pubdate > podcast.lastPubDate) || (!podcast.lastBuildDate && !podcast.lastPubDate)) {
+            parseFeed(feedURL, params)
+              .then(fullParsedFeedObj => {
+                saveParsedFeedToDatabase(fullParsedFeedObj, params, res, rej);
+              })
+              .catch(err => {
+                console.log(parsedFeedObj.podcast.title);
+                console.log(parsedFeedObj.podcast.xmlurl);
+                rej(new errors.GeneralError(err));
+              })
+          } else {
+            res();
+          }
+        });
+
+    })
+    .catch(err => {
+      console.log(feedURL);
+      rej(new errors.GeneralError(err));
+    });
+
   });
 
 }
@@ -58,11 +65,6 @@ function parseFeed (feedURL, params = {}) {
 
     const feedParser = new FeedParser([]),
           req = request(feedURL);
-
-    req.on('error', function (e) {
-      console.log(e);
-      rej(e);
-    });
 
     req.on('response', function (res) {
       let stream = this;
@@ -123,7 +125,7 @@ function parseFeed (feedURL, params = {}) {
 
     function done (e) {
       if (e) {
-        console.log(e);
+        console.log(feedURL);
         rej(e);
       }
 
@@ -140,7 +142,7 @@ function parseFeed (feedURL, params = {}) {
 
 }
 
-function saveParsedFeedToDatabase (parsedFeedObj, params = {}) {
+function saveParsedFeedToDatabase (parsedFeedObj, params = {}, res, rej) {
 
   const {Episode, Podcast} = Models;
 
@@ -163,17 +165,19 @@ function saveParsedFeedToDatabase (parsedFeedObj, params = {}) {
           return EpisodeService.findOrCreateEpisode(prunedEpisode, podcast.id);
         })
         .catch(e => {
-          throw new errors.GeneralError(e);
+          console.log(ep.title);
+          console.log(ep.enclosures[0].url);
+          rej(new errors.GeneralError(e));
         });
       }, Promise.resolve());
 
     })
-    .catch((e) => {
-      throw new errors.GeneralError(e);
+    .then(() => {
+      res();
     })
-    .finally(() => {
-      deleteSQSMessage(params)
-    });
+    .catch((e) => {
+      rej(new errors.GeneralError(e));
+    })
 
 }
 
