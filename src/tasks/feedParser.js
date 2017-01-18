@@ -4,7 +4,7 @@ const
     errors = require('feathers-errors'),
     sqlEngineFactory = require('../repositories/sequelize/engineFactory.js'),
     modelFactory = require('../repositories/sequelize/models'),
-    {deleteSQSMessage} = require('./sqsQueueDeleteMessage'),
+    {deleteSQSMessage} = require('./sqsQueue'),
     {postgresUri} = require('../config');
 
 let PodcastService = require('../services/podcast/PodcastService.js'),

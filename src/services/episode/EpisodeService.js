@@ -5,12 +5,12 @@ const
     errors = require('feathers-errors'),
     {postgresUri} = require('../../config');
 
+const sqlEngine = new sqlEngineFactory({uri: postgresUri});
+const Models = modelFactory(sqlEngine);
+
 class EpisodeService extends SequelizeService {
 
   constructor () {
-    const sqlEngine = new sqlEngineFactory({uri: postgresUri});
-    const Models = modelFactory(sqlEngine);
-
     super({
       Model: Models.Episode
     });

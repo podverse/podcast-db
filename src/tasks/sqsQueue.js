@@ -120,6 +120,25 @@ function parseNextFeedFromQueue () {
   })
 }
 
+function deleteSQSMessage (params = {}) {
+  // If there is a ReceiptHandle, then the feed was parsed from SQS, and we
+  // need to delete the SQS message.
+  if (params.ReceiptHandle) {
+    let sqsParams = {
+      QueueUrl: queueUrl,
+      ReceiptHandle: params.ReceiptHandle
+    };
+
+    sqs.deleteMessage(sqsParams, (err, data) => {
+      if (err) {
+        console.log(err);
+      } else {
+        console.log(data);
+      }
+    })
+  }
+}
+
 function purgeSQSFeedQueue (resolve, reject) {
   let params = {
     QueueUrl: queueUrl
@@ -136,5 +155,6 @@ function purgeSQSFeedQueue (resolve, reject) {
 
 module.exports = {
   addFeedUrlsToSQSParsingQueue,
-  parseNextFeedFromQueue
+  parseNextFeedFromQueue,
+  deleteSQSMessage
 }
