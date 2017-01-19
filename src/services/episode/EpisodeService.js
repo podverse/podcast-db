@@ -40,6 +40,23 @@ class EpisodeService extends SequelizeService {
 
   }
 
+  find (params={}) {
+    const {Podcast} = this.Models;
+
+    // Find an Episode by mediaURL, and include its Podcast.
+    if (typeof params.mediaURL !== 'undefined' && params.mediaURL.length > 0) {
+      let mediaURL = params.mediaURL;
+      params.sequelize = {
+        where: {
+          mediaURL: mediaURL
+        },
+        include: [Podcast]
+      }
+    }
+
+    return super.find(params);
+  }
+
   findOrCreateEpisode(episode, podcastId) {
     return this.Model.findOrCreate({
       where: {
