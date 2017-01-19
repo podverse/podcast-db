@@ -16,10 +16,6 @@ EpisodeService = new EpisodeService();
 const sqlEngine = new sqlEngineFactory({uri: postgresUri});
 const Models = modelFactory(sqlEngine);
 
-// If the podcast's last pubDate or buildDate stored in the db is older than the
-// last buildDate or last pubDate in the feed's, then parse the full feed.
-// If the podcast doesn't exist, parse it.
-// If the podcast exists but doesn't have a pubDate or buildDate, parse it.
 function parseFeedIfHasBeenUpdated (feedURL, params = {}) {
 
   return new Promise ((res, rej) => {
@@ -34,6 +30,10 @@ function parseFeedIfHasBeenUpdated (feedURL, params = {}) {
     .then(podcast => {
       parseFeed(feedURL) // Without params, parseFeed will return podcast info but will not parse episodes
         .then(parsedFeedObj => {
+          // If the podcast's last pubDate or buildDate stored in the db is older than the
+          // last buildDate or last pubDate in the feed's, then parse the full feed.
+          // If the podcast doesn't exist, parse it.
+          // If the podcast exists but doesn't have a pubDate or buildDate, parse it.
           if (!podcast || (podcast.lastBuildDate && parsedFeedObj.podcast.date > podcast.lastBuildDate) || (podcast.lastPubDate && parsedFeedObj.podcast.pubdate > podcast.lastPubDate) || (!podcast.lastBuildDate && !podcast.lastPubDate)) {
             parseFeed(feedURL, params)
               .then(fullParsedFeedObj => {
