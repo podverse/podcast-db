@@ -65,17 +65,23 @@ class PodcastService extends SequelizeService {
         attributes: ['id', 'feedURL', 'title'],
         where: ['title ILIKE ?', '%' + title + '%']
       }
+      return super.find(params);
+
+    }
     // Search for podcast by feedURL
-    } else if (typeof params.query !== 'undefined' && typeof params.query.feedURL !== 'undefined' && params.query.feedURL.length > 0) {
+    else if (typeof params.query !== 'undefined' && typeof params.query.feedURL !== 'undefined' && params.query.feedURL.length > 0) {
       params.sequelize = {
         attributes: ['id', 'feedURL', 'title'],
         where: {
           feedURL: params.query.feedURL
         }
       }
+      return super.find(params);
     }
-
-    return super.find(params);
+    else {
+      // TODO: how do we show a 404 not found page here when the user navs to /podcasts/?
+      throw new errors.GeneralError('A parameter must be provided to the Podcast find service.');
+    }
   }
 
   findOrCreatePodcast (podcast) {

@@ -1,0 +1,42 @@
+***Misc copy & paste things***
+
+00 */12 * * 1-6 /usr/local/bin/node /Users/mitch/repos/podcast-db/scripts/addFeedsToBeParsedForRecentEpisodes.js
+* 0 * * 7 /usr/local/bin/node /Users/mitch/repos/podcast-db/scripts/addFeedsToBeParsedForMaxEpisodes.js
+* 12 * * 7 /usr/local/bin/node /Users/mitch/repos/podcast-db/scripts/addFeedsToBeParsedForRecentEpisodes.js
+*/5 * * * * /usr/local/bin/node /Users/mitch/repos/podcast-db/scripts/parseNextFeedFromQueue.js
+
+---
+
+node -e 'let params = {}; params.shouldParseMaxEpisodes = true; require("./src/tasks/feedParser.js").parseFeedIfHasBeenUpdated("http://feeds.feedburner.com/TheAdamCarollaPodcast", params); require("./src/tasks/feedParser.js").parseFeedIfHasBeenUpdated("http://joeroganexp.joerogan.libsynpro.com/rss", params); require("./src/tasks/feedParser.js").parseFeedIfHasBeenUpdated("http://feeds.feedburner.com/dancarlin/commonsense?format=xml", params)'
+
+---
+
+node -e 'require("./src/tasks/feedParser.js").parseFeedIfHasBeenUpdated("http://feeds.feedburner.com/DuncanTrussell"); require("./src/tasks/feedParser.js").parseFeedIfHasBeenUpdated("http://joeroganexp.joerogan.libsynpro.com/rss"); require("./src/tasks/feedParser.js").parseFeedIfHasBeenUpdated("http://feeds.feedburner.com/dancarlin/commonsense?format=xml")'
+
+---
+
+DROP SCHEMA public CASCADE;
+CREATE SCHEMA public;
+
+(initialize the db)
+
+INSERT INTO podcasts (id, "feedURL", "dateCreated", "lastUpdated") VALUES ('777578ba-5384-4de4-a45a-a0e8b95dcaa9', 'http://feeds.feedburner.com/DuncanTrussell', '2017-01-18T03:29:49+00:00', '2017-01-18T03:29:49+00:00');
+
+INSERT INTO podcasts (id, "feedURL", "dateCreated", "lastUpdated") VALUES ('888578ba-5384-4de4-a45a-a0e8b95dcaa9', 'http://joeroganexp.joerogan.libsynpro.com/rss', '2017-01-18T03:29:49+00:00', '2017-01-18T03:29:49+00:00');
+
+INSERT INTO podcasts (id, "feedURL", "dateCreated", "lastUpdated") VALUES ('999578ba-5384-4de4-a45a-a0e8b95dcaa9', 'http://feeds.feedburner.com/dancarlin/commonsense?format=xml', '2017-01-18T03:29:49+00:00', '2017-01-18T03:29:49+00:00');
+
+---
+
+SELECT p.title, p."imageURL", p.id, (
+  SELECT count(id) FROM episodes WHERE "podcastId"=p.id
+) AS "episodeCount", (
+  SELECT MAX("pubDate") FROM episodes WHERE "podcastId"=p.id
+) AS "lastEpisodePubDate"
+FROM podcasts p, users u
+WHERE u.id='${id}'
+AND u."subscribedPodcastFeedURLs" @> ARRAY[p."feedURL"]::text[];
+
+---
+
+config.queueUrl = '<put your queue here>';
