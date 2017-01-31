@@ -88,7 +88,6 @@ class EpisodeService extends SequelizeService {
 
 }
 
-EpisodeService.prototype.create = undefined;
 EpisodeService.prototype.update = undefined;
 EpisodeService.prototype.remove = undefined;
 EpisodeService.prototype.patch = undefined;
