@@ -4,6 +4,7 @@
   "description": "Podcast database and feed parsing routines",
   "main": "index.js",
   "scripts": {
+    "migrate": "sequelize db:migrate",
     "test": "NODE_ENV=test_db node scripts/test.js"
   },
   "repository": {
@@ -38,6 +39,7 @@
     "pg-hstore": "^2.3.2",
     "request": "^2.79.0",
     "sequelize": "^3.29.0",
+    "sequelize-cli": "https://github.com/sequelize/cli",
     "sequelize-import": "^1.2.1"
   },
   "devDependencies": {

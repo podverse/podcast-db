@@ -1,0 +1,19 @@
+const 
+  path = require('path'),
+  {postgresUri} = require('./src/config.js'),
+  PATH = 'src/repositories/sequelize',
+
+  dbConfig = {
+    "dialect": "postgres",
+    "url": postgresUri
+  };
+
+module.exports = {
+  "migrations-path": path.resolve(PATH, 'migrations'),
+  "seeders-path": path.resolve(PATH, 'seeders'),
+  "models-path": path.resolve(PATH, 'models'),
+  "migrationStorageTableName": "sequelize_meta_podcastdb",
+  "config": __filename,
+  "development": dbConfig,
+  "production": dbConfig
+}

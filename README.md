@@ -24,3 +24,7 @@ Always run the parseNextFeedFromQueue script every 5 minutes.
 * 12 * * 7 /usr/local/bin/node /Users/mitch/repos/podcast-db/scripts/addFeedsToBeParsedForRecentEpisodes.js
 */5 * * * * /usr/local/bin/node /Users/mitch/repos/podcast-db/scripts/parseNextFeedFromQueue.js
 ````
+
+## Migrate DB
+
+`npm run migrate`
