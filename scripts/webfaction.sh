@@ -7,7 +7,7 @@ BASE_DIR=$(dirname "$(readlink -f "$0")")/..
 
 add_max_to_queue="node ${BASE_DIR}/scripts/addFeedsToBeParsedForMaxEpisodes.js"
 add_recent_to_queue="node ${BASE_DIR}/scripts/addFeedsToBeParsedForRecentEpisodes.js"
-parse_next_feed="node ${BASE_DIR}/scripts/parseNextFeedFromQueue.js"
+parse_next_feed="node ${BASE_DIR}/scripts/parseNextFeed.js"
 
 case $1 in
   addMaxToQueue)
