@@ -11,20 +11,16 @@ node -e 'let params = {}; params.shouldParseMaxEpisodes = true; require("./src/t
 
 ---
 
-node -e 'require("./src/tasks/feedParser.js").parseFeedIfHasBeenUpdated("http://feeds.feedburner.com/DuncanTrussell"); require("./src/tasks/feedParser.js").parseFeedIfHasBeenUpdated("http://joeroganexp.joerogan.libsynpro.com/rss"); require("./src/tasks/feedParser.js").parseFeedIfHasBeenUpdated("http://feeds.feedburner.com/dancarlin/commonsense?format=xml")'
+node -e 'require("./src/tasks/feedParser.js").parseFeedIfHasBeenUpdated("http://feeds.feedburner.com/DuncanTrussell"); require("./src/tasks/feedParser.js").parseFeedIfHasBeenUpdated("http://joeroganexp.joerogan.libsynpro.com/rss"); require("./src/tasks/feedParser.js").parseFeedIfHasBeenUpdated("http://feeds.feedburner.com/dancarlin/commonsense")'
 
 ---
 
 DROP SCHEMA public CASCADE;
 CREATE SCHEMA public;
 
-(initialize the db)
+---
 
-INSERT INTO podcasts (id, "feedURL", "dateCreated", "lastUpdated") VALUES ('777578ba-5384-4de4-a45a-a0e8b95dcaa9', 'http://feeds.feedburner.com/DuncanTrussell', '2017-01-18T03:29:49+00:00', '2017-01-18T03:29:49+00:00');
-
-INSERT INTO podcasts (id, "feedURL", "dateCreated", "lastUpdated") VALUES ('888578ba-5384-4de4-a45a-a0e8b95dcaa9', 'http://joeroganexp.joerogan.libsynpro.com/rss', '2017-01-18T03:29:49+00:00', '2017-01-18T03:29:49+00:00');
-
-INSERT INTO podcasts (id, "feedURL", "dateCreated", "lastUpdated") VALUES ('999578ba-5384-4de4-a45a-a0e8b95dcaa9', 'http://feeds.feedburner.com/dancarlin/commonsense?format=xml', '2017-01-18T03:29:49+00:00', '2017-01-18T03:29:49+00:00');
+INSERT INTO podcasts (id, "feedURL", "dateCreated", "lastUpdated") VALUES ('86ffe906aeb64200b5373c0a1b1df88c', 'http://feeds.feedburner.com/TheAdamCarollaPodcast', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
 ---
 
