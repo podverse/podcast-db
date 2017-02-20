@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "migrate": "sequelize db:migrate",
-    "test": "NODE_ENV=test_db node scripts/test.js"
+    "test": "node scripts/test.js"
   },
   "repository": {
     "type": "git",
