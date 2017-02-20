@@ -35,8 +35,7 @@ class EpisodeService extends SequelizeService {
       return this.Model.findOne({
         where: {
           mediaURL: mediaURL,
-        },
-        attributes: ['id']
+        }
       }).then(episode => {
         return episode;
       });
