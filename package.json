@@ -40,7 +40,8 @@
     "request": "^2.79.0",
     "sequelize": "^3.29.0",
     "sequelize-cli": "https://github.com/sequelize/cli",
-    "sequelize-import": "^1.2.1"
+    "sequelize-import": "^1.2.1",
+    "shortid": "^2.2.6"
   },
   "devDependencies": {
     "chai": "^3.5.0",

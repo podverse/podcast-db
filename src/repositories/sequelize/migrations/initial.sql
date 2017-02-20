@@ -2,16 +2,15 @@
 -- PostgreSQL database dump
 --
 
--- Dumped from database version 9.6.0
+-- Dumped from database version 9.6.1
 -- Dumped by pg_dump version 9.6.1
-
 
 --
 -- Name: episodes; Type: TABLE; Schema: public; Owner: postgres
 --
 
 CREATE TABLE episodes (
-    id uuid NOT NULL,
+    id text NOT NULL,
     "mediaURL" text,
     "imageURL" text,
     title text,
@@ -23,7 +22,7 @@ CREATE TABLE episodes (
     "pubDate" timestamp with time zone,
     "dateCreated" timestamp with time zone NOT NULL,
     "lastUpdated" timestamp with time zone NOT NULL,
-    "podcastId" uuid
+    "podcastId" text
 );
 
 --
@@ -31,7 +30,7 @@ CREATE TABLE episodes (
 --
 
 CREATE TABLE podcasts (
-    id uuid NOT NULL,
+    id text NOT NULL,
     "feedURL" text,
     "imageURL" text,
     summary text,
@@ -42,7 +41,6 @@ CREATE TABLE podcasts (
     "dateCreated" timestamp with time zone NOT NULL,
     "lastUpdated" timestamp with time zone NOT NULL
 );
-
 
 --
 -- Name: episodes episodes_mediaURL_key; Type: CONSTRAINT; Schema: public; Owner: postgres
@@ -87,4 +85,3 @@ ALTER TABLE ONLY episodes
 --
 -- PostgreSQL database dump complete
 --
-

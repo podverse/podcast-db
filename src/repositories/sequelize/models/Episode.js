@@ -1,17 +1,21 @@
+var shortid = require('shortid');
+
 'use strict';
 
 module.exports = function(sequelize, DataTypes) {
 
   // You could call this a clip or you could call it an episode.
-  // I would consider if startTime && endTime are null, then it
+  // Podverse assumes if startTime && endTime are null, then it
   // is referencing the entire episode.
 
   const episode = sequelize.define('episode', {
 
     id: {
-      type: DataTypes.UUID,
-      defaultValue: DataTypes.UUIDV1,
-      primaryKey: true
+      type: DataTypes.TEXT,
+      primaryKey: true,
+      defaultValue: function () {
+        return shortid.generate();
+      }
     },
 
     mediaURL: {

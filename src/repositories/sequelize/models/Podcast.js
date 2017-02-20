@@ -1,15 +1,17 @@
+var shortid = require('shortid');
+
 'use strict';
 
 module.exports = function(sequelize, DataTypes) {
 
-  // Podcast primary key is it's RSS URL?
-
   const podcast = sequelize.define('podcast', {
 
     id: {
-      type: DataTypes.UUID,
-      defaultValue: DataTypes.UUIDV1,
-      primaryKey: true
+      type: DataTypes.TEXT,
+      primaryKey: true,
+      defaultValue: function () {
+        return shortid.generate();
+      }
     },
 
     feedURL: {
