@@ -35,12 +35,12 @@ class EpisodeService extends SequelizeService {
       return this.Model.findOne({
         where: {
           mediaURL: mediaURL,
-        }
+        },
+        include: [Podcast]
       }).then(episode => {
         return episode;
       });
     } else {
-      // Retrieve podcast and its episode ids and titles only
       params.sequelize = {
         include: [Podcast]
       }
