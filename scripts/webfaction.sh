@@ -7,6 +7,7 @@ BASE_DIR=$(dirname "$(readlink -f "$0")")/..
 
 add_max_to_queue="node ${BASE_DIR}/scripts/addFeedsToBeParsedForMaxEpisodes.js"
 add_recent_to_queue="node ${BASE_DIR}/scripts/addFeedsToBeParsedForRecentEpisodes.js"
+add_unparsed_to_queue="node ${BASE_DIR}/scripts/addUnparsedFeedsToBeParsedForMaxEpisodes.js"
 parse_next_feed="node ${BASE_DIR}/scripts/parseNextFeed.js"
 
 case $1 in
@@ -20,13 +21,18 @@ case $1 in
     nohup ${add_recent_to_queue} &>> ${LOG_PATH}
     ;;
 
+  addUnparsedToQueue)
+    cd ${BASE_DIR}
+    nohup ${add_unparsed_to_queue} &>> ${LOG_PATH}
+    ;;
+
   parseNextFeedFromQueue)
     cd ${BASE_DIR}
     nohup ${parse_next_feed} &>> ${LOG_PATH}
     ;;
 
   *)
-    echo "addMaxToQueue|addRecentToQueue|parseNextFeedFromQueue logfile"
+    echo "addMaxToQueue|addRecentToQueue|addUnparsedToQueue|parseNextFeedFromQueue logfile"
     ;;
 
 esac

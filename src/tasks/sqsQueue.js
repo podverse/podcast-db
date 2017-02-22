@@ -19,9 +19,24 @@ function addFeedUrlsToSQSParsingQueue(params = {}) {
     .then(() => {
       let {Podcast} = Models;
 
-      return Podcast.findAll({
-        attributes: ['feedURL']
-      })
+      let queryObj;
+
+      // NOTE: onlyParseUnparsed assumes if a podcast doesn't have a title then
+      // it hasn't been parsed. Definitely a flawed approach.
+      if (params.onlyParseUnparsed) {
+        queryObj = {
+          attributes: ['feedURL'],
+          where: {
+            title: null
+          }
+        };
+      } else {
+        queryObj = {
+          attributes: ['feedURL']
+        };
+      }
+
+      return Podcast.findAll(queryObj)
         .then(podcasts => {
 
           let feedUrls = [];
