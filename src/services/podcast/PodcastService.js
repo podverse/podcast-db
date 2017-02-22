@@ -29,9 +29,7 @@ class PodcastService extends SequelizeService {
         },
         include: [{
           model: Episode,
-          limit: params.paginateLimit,
-          offset: params.offset,
-          order: '"pubDate" DESC'
+          attributes: ['id', 'title', 'mediaURL', 'pubDate']
         }]
       }
 
@@ -48,9 +46,7 @@ class PodcastService extends SequelizeService {
       params.sequelize = {
         include: [{
           model: Episode,
-          limit: params.paginateLimit,
-          offset: params.offset,
-          order: '"pubDate" DESC'
+          attributes: ['id', 'title', 'mediaURL', 'pubDate']
         }]
       }
 
