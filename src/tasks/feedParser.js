@@ -5,7 +5,8 @@ const
     sqlEngineFactory = require('../repositories/sequelize/engineFactory.js'),
     modelFactory = require('../repositories/sequelize/models'),
     {deleteSQSMessage} = require('./sqsQueue'),
-    {postgresUri} = require('../config');
+    {postgresUri} = require('../config'),
+    {podcastOverride} = require('../custom-overrides/podcastOverride');
 
 let PodcastService = require('../services/podcast/PodcastService.js'),
     EpisodeService = require('../services/episode/EpisodeService.js');
@@ -151,6 +152,9 @@ function saveParsedFeedToDatabase (parsedFeedObj, res, rej) {
   // Reduce the episodes array to 2000 items, in case someone maliciously tries
   // to overload the database
   episodes = episodes.slice(0, 2000);
+
+  // Override fields as needed for specific podcasts
+  podcast = podcastOverride(podcast);
 
   return PodcastService.findOrCreatePodcast(podcast)
     .then(() => {

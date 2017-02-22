@@ -24,6 +24,10 @@ INSERT INTO podcasts (id, "feedURL", "dateCreated", "lastUpdated") VALUES ('86ff
 
 ---
 
+DELETE FROM podcasts WHERE "feedURL"='feed url goes here';
+
+---
+
 SELECT p.title, p."imageURL", p.id, (
   SELECT count(id) FROM episodes WHERE "podcastId"=p.id
 ) AS "episodeCount", (
