@@ -71,6 +71,7 @@ function parseFeed (feedURL, params = {}) {
       let stream = this;
 
       if (response.statusCode != 200) {
+        console.log('feedURL with failing status code ', feedURL)
         return this.emit('error', new errors.GeneralError('Bad status code'));
       }
 
@@ -122,6 +123,7 @@ function parseFeed (feedURL, params = {}) {
     }
 
     req.on('error', function (e) {
+      console.log('feedURL', feedURL);
       console.log(e);
       reject(e);
     });
