@@ -22,17 +22,6 @@ class PodcastService extends SequelizeService {
 
     if (typeof params.feedURL !== 'undefined' && params.feedURL.length > 0) {
 
-      params.sequelize = {
-        attributes: ['id', 'feedURL', 'title'],
-        where: {
-          feedURL: params.feedURL
-        },
-        include: [{
-          model: Episode,
-          attributes: ['id', 'title', 'mediaURL', 'pubDate']
-        }]
-      }
-
       return this.Model.findOne({
         where: {
           feedURL: params.feedURL,
