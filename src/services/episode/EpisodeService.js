@@ -23,15 +23,6 @@ class EpisodeService extends SequelizeService {
     if (typeof params.mediaURL !== 'undefined' && params.mediaURL.length > 0) {
       let mediaURL = params.mediaURL;
 
-      // Snowflake to handle decoding The Adam Carolla Podcast mediaURL format.
-      // The 'ad_params=zones=' seems to cause everything after the second = sign
-      // to be encoded. This snowflake might be needed for all castfire.com feeds.
-      if (mediaURL.indexOf('ad_params=zones') > -1) {
-        let firstPartOfUrl = mediaURL.substr(0, mediaURL.indexOf('ad_params=zones') + 10);
-        let lastPartOfUrl = encodeURIComponent(mediaURL.substr(mediaURL.indexOf('ad_params=zones') + 10));
-        mediaURL = firstPartOfUrl + lastPartOfUrl;
-      }
-
       return this.Model.findOne({
         where: {
           mediaURL: mediaURL,
