@@ -48,7 +48,7 @@ describe('PodcastService', function () {
 
   });
 
-  it.only('should be able to retrieve all podcasts with expected attributes', function (done) {
+  it('should be able to retrieve all podcasts with expected attributes', function (done) {
 
     this.Models.Podcast.create({
         feedURL: 'http://example.com/rss',
