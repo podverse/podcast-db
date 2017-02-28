@@ -48,4 +48,39 @@ describe('PodcastService', function () {
 
   });
 
+  it.only('should be able to retrieve all podcasts with expected attributes', function (done) {
+
+    this.Models.Podcast.create({
+        feedURL: 'http://example.com/rss',
+        title: 'Some kind of title',
+        imageURL: 'http://example.com/img'
+      })
+      .then(() =>{
+        this.Models.Podcast.create({
+          feedURL: 'http://example.com/rss2',
+          imageURL: 'http://example.com/img2'
+        })
+        .then(() =>{
+          this.Models.Podcast.create({
+            feedURL: 'http://example.com/rss3',
+            imageURL: 'http://example.com/img3'
+          })
+          .then(() => {
+            this.podcastSvc.retrieveAllPodcasts()
+              .then(podcasts => {
+                expect(podcasts.length).to.equal(3);
+                expect(podcasts[0].id).to.exist;
+                expect(podcasts[0].title).to.exist;
+                expect(podcasts[0].imageURL).to.exist;
+                done();
+              });
+          })
+          .catch(e => {
+            console.log(e);
+          })
+
+        })
+      })
+  });
+
 });
