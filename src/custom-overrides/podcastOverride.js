@@ -14,5 +14,4 @@ function podcastOverride(podcast) {
 
 module.exports = {
   podcastOverride: podcastOverride
-  podcastOverride: podcastOverride,
 }
