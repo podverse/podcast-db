@@ -6,7 +6,8 @@ const
     modelFactory = require('../repositories/sequelize/models'),
     {deleteSQSMessage} = require('./sqsQueue'),
     {postgresUri} = require('../config'),
-    {podcastOverride} = require('../custom-overrides/podcastOverride');
+    {podcastOverride} = require('../custom-overrides/podcastOverride'),
+    _ = require('lodash');
 
 let PodcastService = require('../services/podcast/PodcastService.js'),
     EpisodeService = require('../services/episode/EpisodeService.js');
@@ -165,6 +166,21 @@ function saveParsedFeedToDatabase (parsedFeedObj, res, rej) {
         if (!ep.enclosures || !ep.enclosures[0] || !ep.enclosures[0].url) {
           return promise
         }
+
+        // NOTE: in rare cases a podcast feed may have multiple enclosures. The
+        // check below looks for the first enclosure with a type that contains
+        // the string 'audio', then uses that. Else do not save the episode.
+        // Example: History on Fire (http://feeds.podtrac.com/xUnmFXZLuavF)
+        if (ep.enclosures.length > 1) {
+          let audioEnclosure = _.find(ep.enclosures, function (enclosure) {
+            if (enclosure.type && (enclosure.type.indexOf('audio') > -1)) {
+              return enclosure
+            }
+          });
+          ep.enclosures = [];
+          ep.enclosures.push(audioEnclosure);
+        }
+
         return promise.then(() => {
           let prunedEpisode = pruneEpisode(ep);
           return EpisodeService.findOrCreateEpisode(prunedEpisode, podcast.id);
