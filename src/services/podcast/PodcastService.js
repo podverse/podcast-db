@@ -35,7 +35,7 @@ class PodcastService extends SequelizeService {
       params.sequelize = {
         include: [{
           model: Episode,
-          attributes: ['id', 'title', 'mediaURL', 'pubDate']
+          attributes: ['id', 'title', 'mediaURL', 'pubDate', 'isPublic']
         }]
       }
 
@@ -90,6 +90,9 @@ class PodcastService extends SequelizeService {
         author: podcast.author,
         lastBuildDate: podcast.date,
         lastPubDate: podcast.pubdate
+      })
+      .then(() => {
+        return podcast.id;
       });
     })
     .catch(err => {

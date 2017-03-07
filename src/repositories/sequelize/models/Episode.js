@@ -50,7 +50,13 @@ module.exports = function(sequelize, DataTypes) {
 
     mediaType: DataTypes.TEXT,
 
-    pubDate: DataTypes.DATE
+    pubDate: DataTypes.DATE,
+
+    isPublic: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false
+    }
+
 
   }, {
       updatedAt: 'lastUpdated',

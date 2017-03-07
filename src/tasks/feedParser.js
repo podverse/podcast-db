@@ -160,38 +160,41 @@ function saveParsedFeedToDatabase (parsedFeedObj, res, rej) {
   podcast = podcastOverride(podcast);
 
   return PodcastService.findOrCreatePodcast(podcast)
-    .then(() => {
+    .then(podcastId => {
 
-      return promiseChain = episodes.reduce((promise, ep) => {
-        if (!ep.enclosures || !ep.enclosures[0] || !ep.enclosures[0].url) {
-          return promise
-        }
+      return EpisodeService.setAllEpisodesToNotPublic(podcastId)
+        .then(() => {
 
-        // NOTE: in rare cases a podcast feed may have multiple enclosures. The
-        // check below looks for the first enclosure with a type that contains
-        // the string 'audio', then uses that. Else do not save the episode.
-        // Example: History on Fire (http://feeds.podtrac.com/xUnmFXZLuavF)
-        if (ep.enclosures.length > 1) {
-          let audioEnclosure = _.find(ep.enclosures, function (enclosure) {
-            if (enclosure.type && (enclosure.type.indexOf('audio') > -1)) {
-              return enclosure
+          return promiseChain = episodes.reduce((promise, ep) => {
+            if (!ep.enclosures || !ep.enclosures[0] || !ep.enclosures[0].url) {
+              return promise
             }
-          });
-          ep.enclosures = [];
-          ep.enclosures.push(audioEnclosure);
-        }
 
-        return promise.then(() => {
-          let prunedEpisode = pruneEpisode(ep);
-          return EpisodeService.findOrCreateEpisode(prunedEpisode, podcast.id);
-        })
-        .catch(e => {
-          console.log(ep.title);
-          console.log(ep.enclosures[0].url);
-          rej(new errors.GeneralError(e));
+            // NOTE: in rare cases a podcast feed may have multiple enclosures. The
+            // check below looks for the first enclosure with a type that contains
+            // the string 'audio', then uses that. Else do not save the episode.
+            // Example: History on Fire (http://feeds.podtrac.com/xUnmFXZLuavF)
+            if (ep.enclosures.length > 1) {
+              let audioEnclosure = _.find(ep.enclosures, function (enclosure) {
+                if (enclosure.type && (enclosure.type.indexOf('audio') > -1)) {
+                  return enclosure
+                }
+              });
+              ep.enclosures = [];
+              ep.enclosures.push(audioEnclosure);
+            }
+
+            return promise.then(() => {
+              let prunedEpisode = pruneEpisode(ep);
+              return EpisodeService.findOrCreateEpisode(prunedEpisode, podcast.id);
+            })
+            .catch(e => {
+              console.log(ep.title);
+              console.log(ep.enclosures[0].url);
+              rej(new errors.GeneralError(e));
+            });
+          }, Promise.resolve());
         });
-      }, Promise.resolve());
-
     })
     .then(() => {
       res();

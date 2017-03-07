@@ -77,13 +77,25 @@ class EpisodeService extends SequelizeService {
         link: episode.link,
         mediaBytes: episode.mediaBytes,
         mediaType: episode.mediaType,
-        pubDate: episode.pubDate
+        pubDate: episode.pubDate,
+        isPublic: true
       })
     })
     .catch(err => {
-      console.log(err);
       console.log(episode.title);
       console.log(episode.mediaURL);
+      console.log(err);
+    })
+  }
+
+  setAllEpisodesToNotPublic(podcastId) {
+    return this.Model.update(
+      { isPublic: false },
+      { where: { podcastId: podcastId } }
+    )
+    .catch(err => {
+      console.log(podcastId);
+      console.log(err);
     })
   }
 
