@@ -32,23 +32,15 @@ function parseFeedIfHasBeenUpdated (feedURL, params = {}) {
     .then(podcast => {
       parseFeed(feedURL) // Without params, parseFeed will return podcast info but will not parse episodes
         .then(parsedFeedObj => {
-          // If the podcast's last pubDate or buildDate stored in the db is older than the
-          // last buildDate or last pubDate in the feed's, then parse the full feed.
-          // If the podcast doesn't exist, parse it.
-          // If the podcast exists but doesn't have a pubDate or buildDate, parse it.
-          if (!podcast || (podcast.lastBuildDate && parsedFeedObj.podcast.date > podcast.lastBuildDate) || (podcast.lastPubDate && parsedFeedObj.podcast.pubdate > podcast.lastPubDate) || (!podcast.lastBuildDate && !podcast.lastPubDate)) {
-            parseFeed(feedURL, params)
-              .then(fullParsedFeedObj => {
-                saveParsedFeedToDatabase(fullParsedFeedObj, res, rej);
-              })
-              .catch(err => {
-                console.log(parsedFeedObj.podcast.title);
-                console.log(parsedFeedObj.podcast.xmlurl);
-                rej(new errors.GeneralError(err));
-              })
-          } else {
-            res();
-          }
+          parseFeed(feedURL, params)
+            .then(fullParsedFeedObj => {
+              saveParsedFeedToDatabase(fullParsedFeedObj, res, rej);
+            })
+            .catch(err => {
+              console.log(parsedFeedObj.podcast.title);
+              console.log(parsedFeedObj.podcast.xmlurl);
+              rej(new errors.GeneralError(err));
+            })
         });
 
     })
@@ -115,7 +107,7 @@ function parseFeed (feedURL, params = {}) {
         while (item = stream.read()) {
           episodeObjs.push(item);
 
-          if (episodeObjs.length >= 1000) {
+          if (episodeObjs.length >= 10000) {
             stream.emit('end');
           }
         }
@@ -152,9 +144,9 @@ function saveParsedFeedToDatabase (parsedFeedObj, res, rej) {
   let podcast = parsedFeedObj.podcast;
   let episodes = parsedFeedObj.episodes || [];
 
-  // Reduce the episodes array to 2000 items, in case someone maliciously tries
+  // Reduce the episodes array to 10000 items, in case someone maliciously tries
   // to overload the database
-  episodes = episodes.slice(0, 2000);
+  episodes = episodes.slice(0, 10000);
 
   // Override fields as needed for specific podcasts
   podcast = podcastOverride(podcast);
