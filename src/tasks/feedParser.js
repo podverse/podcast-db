@@ -38,7 +38,7 @@ function parseFeedIfHasBeenUpdated (feedURL, params = {}) {
             })
             .catch(err => {
               console.log(parsedFeedObj.podcast.title);
-              console.log(parsedFeedObj.podcast.xmlurl);
+              console.log(feedURL);
               rej(new errors.GeneralError(err));
             })
         });
@@ -124,9 +124,11 @@ function parseFeed (feedURL, params = {}) {
     feedParser.on('end', done);
 
     function done () {
-      if (!podcastObj.xmlurl) {
-        podcastObj.xmlurl = feedURL;
-      }
+
+      // Always use the feedURL we provide. We use feedURLs as the (flawed) unique id
+      // of podcasts, so we want to avoid changing the feedURL of a podcast
+      // unless we explicitly tell it to.
+      podcastObj.xmlurl = feedURL;
 
       parsedFeedObj.podcast = podcastObj;
       parsedFeedObj.episodes = episodeObjs;

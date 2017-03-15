@@ -28,6 +28,10 @@ DELETE FROM podcasts WHERE "feedURL"='feed url goes here';
 
 ---
 
+UPDATE podcasts SET "feedURL"='https://www.blubrry.com/feeds/jordanbpeterson.xml' WHERE "feedURL"='http://www.blubrry.com/feeds/jordanbpeterson.xml';
+
+---
+
 SELECT p.title, p."imageURL", p.id, (
   SELECT count(id) FROM episodes WHERE "podcastId"=p.id
 ) AS "episodeCount", (
