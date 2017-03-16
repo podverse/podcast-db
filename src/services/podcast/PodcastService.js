@@ -103,9 +103,14 @@ class PodcastService extends SequelizeService {
   }
 
   retrieveAllPodcasts () {
-    return this.Model.findAll({
-      attributes: ['id', 'title', 'imageURL']
-    })
+    return sqlEngine.query(`
+      SELECT p.title, p."imageURL", p.id, (
+        SELECT title FROM episodes WHERE "podcastId"=p.id ORDER BY "pubDate" DESC LIMIT 1
+      ) AS "lastEpisodeTitle", (
+        SELECT MAX("pubDate") FROM episodes WHERE "podcastId"=p.id
+      ) AS "lastEpisodePubDate"
+      FROM podcasts p;
+    `, { type: sqlEngine.QueryTypes.SELECT });
   }
 
 }

@@ -20,6 +20,10 @@ CREATE SCHEMA public;
 
 ---
 
+SELECT "title" FROM "podcasts" WHERE "title"='01 - Reality and the Sacred';
+
+---
+
 INSERT INTO podcasts (id, "feedURL", "dateCreated", "lastUpdated") VALUES ('86ffe906aeb64200b5373c0a1b1df88c', 'http://feeds.feedburner.com/TheAdamCarollaPodcast', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
 ---
