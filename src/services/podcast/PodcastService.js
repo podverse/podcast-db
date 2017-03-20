@@ -35,7 +35,7 @@ class PodcastService extends SequelizeService {
       params.sequelize = {
         include: [{
           model: Episode,
-          attributes: ['id', 'title', 'mediaURL', 'pubDate', 'isPublic']
+          attributes: ['id', 'title', 'mediaURL', 'pubDate', 'summary', 'isPublic']
         }]
       }
 
