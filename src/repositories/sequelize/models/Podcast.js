@@ -37,7 +37,11 @@ module.exports = function(sequelize, DataTypes) {
 
     lastBuildDate: DataTypes.DATE,
 
-    lastPubDate: DataTypes.DATE
+    lastPubDate: DataTypes.DATE,
+
+    lastEpisodeTitle: DataTypes.TEXT,
+
+    totalAvailableEpisodes: DataTypes.INTEGER
 
   }, {
       updatedAt: 'lastUpdated',

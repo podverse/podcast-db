@@ -89,7 +89,9 @@ class PodcastService extends SequelizeService {
         title: podcast.title,
         author: podcast.author,
         lastBuildDate: podcast.date,
-        lastPubDate: podcast.pubdate
+        lastPubDate: podcast.pubdate,
+        lastEpisodeTitle: podcast.lastEpisodeTitle,
+        totalAvailableEpisodes: podcast.totalAvailableEpisodes
       })
       .then(() => {
         return podcast.id;
@@ -104,9 +106,7 @@ class PodcastService extends SequelizeService {
 
   retrieveAllPodcasts () {
     return sqlEngine.query(`
-      SELECT p.title, p."imageURL", p.id, (
-        SELECT title FROM episodes WHERE "podcastId"=p.id ORDER BY "pubDate" DESC LIMIT 1
-      ) AS "lastEpisodeTitle", (
+      SELECT p.title, p."imageURL", p.id, p."lastEpisodeTitle", p."totalAvailableEpisodes", (
         SELECT MAX("pubDate") FROM episodes WHERE "podcastId"=p.id
       ) AS "lastEpisodePubDate"
       FROM podcasts p;

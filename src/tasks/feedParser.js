@@ -130,6 +130,15 @@ function parseFeed (feedURL, params = {}) {
       // unless we explicitly tell it to.
       podcastObj.xmlurl = feedURL;
 
+      // TODO: Don't assume that the most recent episode is in the 0 position of
+      // the array. Instead find the title based on episode with the most recent
+      // pubDate.
+      if (episodeObjs.length > 0) {
+        podcastObj.lastEpisodeTitle = episodeObjs[0].title;
+      }
+
+      podcastObj.totalAvailableEpisodes = episodeObjs.length;
+
       parsedFeedObj.podcast = podcastObj;
       parsedFeedObj.episodes = episodeObjs;
       resolve(parsedFeedObj);
