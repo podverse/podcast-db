@@ -47,4 +47,12 @@ AND u."subscribedPodcastFeedURLs" @> ARRAY[p."feedURL"]::text[];
 
 ---
 
+UPDATE "mediaRefs" SET "allTimeTotalUniquePageviews"=123 WHERE id='<someid>';
+
+---
+
+SELECT title, id, "allTimeTotalUniquePageviews", "pastHourTotalUniquePageviews" FROM "mediaRefs" WHERE id='<someid>';
+
+---
+
 config.queueUrl = '<put your queue here>';

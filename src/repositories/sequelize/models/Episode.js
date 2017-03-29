@@ -55,8 +55,37 @@ module.exports = function(sequelize, DataTypes) {
     isPublic: {
       type: DataTypes.BOOLEAN,
       defaultValue: false
-    }
+    },
 
+    pastHourTotalUniquePageviews: {
+      type: DataTypes.INTEGER,
+      defaultValue: 0
+    },
+
+    pastWeekTotalUniquePageviews: {
+      type: DataTypes.INTEGER,
+      defaultValue: 0
+    },
+
+    pastDayTotalUniquePageviews: {
+      type: DataTypes.INTEGER,
+      defaultValue: 0
+    },
+
+    pastWeekTotalUniquePageviews: {
+      type: DataTypes.INTEGER,
+      defaultValue: 0
+    },
+
+    pastYearTotalUniquePageviews: {
+      type: DataTypes.INTEGER,
+      defaultValue: 0
+    },
+
+    allTimeTotalUniquePageviews: {
+      type: DataTypes.INTEGER,
+      defaultValue: 0
+    }
 
   }, {
       updatedAt: 'lastUpdated',
