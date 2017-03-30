@@ -4,16 +4,15 @@ module.exports = {
   up: function (queryInterface, Sequelize) {
 
     queryInterface.addColumn(
-      'episodes',
+      'podcasts',
       'pastHourTotalUniquePageviews',
       {
         type: Sequelize.INTEGER
       }
     );
 
-
     queryInterface.addColumn(
-      'episodes',
+      'podcasts',
       'pastDayTotalUniquePageviews',
       {
         type: Sequelize.INTEGER
@@ -21,7 +20,7 @@ module.exports = {
     );
 
     queryInterface.addColumn(
-      'episodes',
+      'podcasts',
       'pastWeekTotalUniquePageviews',
       {
         type: Sequelize.INTEGER
@@ -29,7 +28,7 @@ module.exports = {
     );
 
     queryInterface.addColumn(
-      'episodes',
+      'podcasts',
       'pastMonthTotalUniquePageviews',
       {
         type: Sequelize.INTEGER
@@ -37,7 +36,7 @@ module.exports = {
     );
 
     queryInterface.addColumn(
-      'episodes',
+      'podcasts',
       'pastYearTotalUniquePageviews',
       {
         type: Sequelize.INTEGER
@@ -45,7 +44,7 @@ module.exports = {
     );
 
     queryInterface.addColumn(
-      'episodes',
+      'podcasts',
       'allTimeTotalUniquePageviews',
       {
         type: Sequelize.INTEGER
