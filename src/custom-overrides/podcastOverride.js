@@ -6,7 +6,7 @@ function podcastOverride(podcast) {
   }
 
   if (podcast.xmlurl === 'http://theartofcharmpodcast.theartofcharm.libsynpro.com/rss') {
-      podcast.title = 'The Art of Charm';
+    podcast.title = 'The Art of Charm';
   }
 
   return podcast;

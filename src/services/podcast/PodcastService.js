@@ -91,7 +91,8 @@ class PodcastService extends SequelizeService {
         lastBuildDate: podcast.date,
         lastPubDate: podcast.pubdate,
         lastEpisodeTitle: podcast.lastEpisodeTitle,
-        totalAvailableEpisodes: podcast.totalAvailableEpisodes
+        totalAvailableEpisodes: podcast.totalAvailableEpisodes,
+        categories: podcast.categories
       })
       .then(() => {
         return podcast.id;

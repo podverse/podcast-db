@@ -41,7 +41,12 @@ module.exports = function(sequelize, DataTypes) {
 
     lastEpisodeTitle: DataTypes.TEXT,
 
-    totalAvailableEpisodes: DataTypes.INTEGER
+    totalAvailableEpisodes: DataTypes.INTEGER,
+
+    categories: {
+      type: DataTypes.ARRAY(DataTypes.TEXT),
+      defaultValue: []
+    }
 
   }, {
       updatedAt: 'lastUpdated',
