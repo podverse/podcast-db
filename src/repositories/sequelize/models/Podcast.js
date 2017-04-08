@@ -46,6 +46,36 @@ module.exports = function(sequelize, DataTypes) {
     categories: {
       type: DataTypes.ARRAY(DataTypes.TEXT),
       defaultValue: []
+    },
+
+    pastHourTotalUniquePageviews: {
+      type: DataTypes.INTEGER,
+      defaultValue: 0
+    },
+
+    pastDayTotalUniquePageviews: {
+      type: DataTypes.INTEGER,
+      defaultValue: 0
+    },
+
+    pastWeekTotalUniquePageviews: {
+      type: DataTypes.INTEGER,
+      defaultValue: 0
+    },
+
+    pastMonthTotalUniquePageviews: {
+      type: DataTypes.INTEGER,
+      defaultValue: 0
+    },
+
+    pastYearTotalUniquePageviews: {
+      type: DataTypes.INTEGER,
+      defaultValue: 0
+    },
+
+    allTimeTotalUniquePageviews: {
+      type: DataTypes.INTEGER,
+      defaultValue: 0
     }
 
   }, {
