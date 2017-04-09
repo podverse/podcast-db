@@ -58,32 +58,6 @@ class EpisodeService extends SequelizeService {
     return super.find(params);
   }
 
-  // Use a custom update method instead of the Feathers update method
-  updateBatchEpisodesUniquePageviewCount (timeRange, data) {
-
-    if (timeRange === 'pastHourTotalUniquePageviews') {
-
-    } else if (timeRange === 'pastDayTotalUniquePageviews') {
-
-    } else if (timeRange === 'pastWeekTotalUniquePageviews') {
-
-    } else if (timeRange === 'pastMonthTotalUniquePageviews') {
-
-    } else if (timeRange === 'pastYearTotalUniquePageviews') {
-
-    } else if (timeRange === 'allTimeTotalUniquePageviews') {
-
-    }
-
-    // create a raw SQL string that will update every mediaRef or episode
-    // by its id
-
-    // loop through the data array to create the raw SQL string
-    // then plug in and invoke the SQL string
-
-    // return a promise?
-  }
-
   findOrCreateEpisode(episode, podcastId) {
     return this.Model.findOrCreate({
       where: {
