@@ -53,6 +53,8 @@ class EpisodeService extends SequelizeService {
         },
         include: [Podcast]
       }
+    } else {
+      throw new errors.GeneralError('A parameter must be provided to the Episode find service.');
     }
 
     return super.find(params);
