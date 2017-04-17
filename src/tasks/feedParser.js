@@ -57,8 +57,12 @@ function parseFeed (feedURL, params = {}) {
 
   return new Promise ((resolve, reject) => {
 
+    var options = {
+      headers: {'user-agent': 'node.js'}
+    }
+
     const feedParser = new FeedParser([]),
-          req = request(feedURL);
+          req = request(feedURL, options);
 
     req.on('response', function (response) {
       let stream = this;
