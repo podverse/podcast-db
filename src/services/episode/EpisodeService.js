@@ -56,7 +56,7 @@ class EpisodeService extends SequelizeService {
     } else if (params.includePodcastTitle) {
       params.sequelize.include = [{
         model: Podcast,
-        attributes: ['title']
+        attributes: ['title', 'imageURL']
       }]
     }
 
