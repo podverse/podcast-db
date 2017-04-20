@@ -58,7 +58,6 @@ function parseFeed (feedURL, params = {}) {
   return new Promise ((resolve, reject) => {
 
     var options = {
-      method: 'GET',
       headers: {'user-agent': 'node.js'}
     }
 
