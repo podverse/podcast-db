@@ -53,8 +53,11 @@ class EpisodeService extends SequelizeService {
         },
         include: [Podcast]
       }
-    } else {
-      throw new errors.GeneralError('A parameter must be provided to the Episode find service.');
+    } else if (params.includePodcastTitle) {
+      params.sequelize.include = [{
+        model: Podcast,
+        attributes: ['title']
+      }]
     }
 
     return super.find(params);
