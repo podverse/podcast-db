@@ -39,9 +39,9 @@
     "pg": "^6.1.2",
     "pg-hstore": "^2.3.2",
     "request": "^2.79.0",
-    "sequelize": "^3.29.0",
-    "sequelize-cli": "https://github.com/sequelize/cli",
-    "sequelize-import": "^1.2.1",
+    "sequelize": "3.23.6",
+    "sequelize-cli": "2.4.0",
+    "sequelize-import": "1.2.1",
     "shortid": "^2.2.6"
   },
   "devDependencies": {
