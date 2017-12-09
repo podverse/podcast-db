@@ -1,16 +1,6 @@
 # podcast_db
 
-Parses podcast feeds by feed URL then saves them in a database.
-
-## Trying to reduce redundant parsing
-
-If you run parseFeedIfHasBeenUpdated with param shouldParseRecentEpisodes = true OR shouldParseMaxEpisodes = true, then recent episodes will be parsed and saved ONLY IF:
-
-1) the parsed podcast's lastBuildDate is more recent than the saved podcast's lastBuildDate
-2) the parsed podcast's lastPubDate is more recent than the saved podcast's lastPubDate
-3) the saved podcast does not have a lastBuildDate or a lastPubDate.
-
-Otherwise parsing is complete, and the podcast is not updated in the database.
+Parses podcast feeds by feed URL and saves them in a database.
 
 ## Setup
 
@@ -25,7 +15,7 @@ Otherwise parsing is complete, and the podcast is not updated in the database.
 ### Add/update a podcast and all of its episodes
 
 ```
-node -e 'let params = {}; params.shouldParseMaxEpisodes = true; require("./src/tasks/feedParser.js").parseFeedIfHasBeenUpdated("<PODCAST FEED URL>")'
+node -e 'let params = {}; params.shouldParseMaxEpisodes = true; require("./src/tasks/feedParser.js").parseFeedIfHasBeenUpdated("<podcast feed url>")'
 ```
 
 ### Add/update a podcast and all of its episodes only if a new episode is found
@@ -33,8 +23,18 @@ node -e 'let params = {}; params.shouldParseMaxEpisodes = true; require("./src/t
 Note: Right now the parser only checks the first episode in the feed is to determine if a new episode is available or not.
 
 ```
-node -e 'let params = {}; params.shouldParseRecentEpisodes = true; require("./src/tasks/feedParser.js").parseFeedIfHasBeenUpdated("<PODCAST FEED URL>")'
+node -e 'let params = {}; params.shouldParseRecentEpisodes = true; require("./src/tasks/feedParser.js").parseFeedIfHasBeenUpdated("<podcast feed url>")'
 ```
+
+## Trying to reduce redundant parsing
+
+If you run parseFeedIfHasBeenUpdated with param shouldParseRecentEpisodes = true OR shouldParseMaxEpisodes = true, then recent episodes will be parsed and saved ONLY IF:
+
+1) the parsed podcast's lastBuildDate is more recent than the saved podcast's lastBuildDate
+2) the parsed podcast's lastPubDate is more recent than the saved podcast's lastPubDate
+3) the saved podcast does not have a lastBuildDate or a lastPubDate.
+
+Otherwise parsing is complete, and the podcast is not updated in the database.
 
 ## Docker / AWS Commands
 
