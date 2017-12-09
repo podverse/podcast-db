@@ -6,7 +6,7 @@ Parses podcast feeds by feed URL and saves them in a database.
 
 `npm install`
 
-## Migrate Database
+## Migrate database
 
 `npm run migrate`
 
@@ -36,7 +36,7 @@ If you run parseFeedIfHasBeenUpdated with param shouldParseRecentEpisodes = true
 
 Otherwise parsing is complete, and the podcast is not updated in the database.
 
-## Docker / AWS Commands
+## Docker / AWS commands
 
 Note: This implementation depends on AWS at the moment. Ideally it should be more platform agnostic.
 
