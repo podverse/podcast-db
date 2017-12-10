@@ -5,6 +5,7 @@
 -- Dumped from database version 9.6.6
 -- Dumped by pg_dump version 9.6.1
 
+
 --
 -- Name: episodes; Type: TABLE; Schema: public; Owner: postgres
 --
@@ -32,18 +33,19 @@ CREATE TABLE episodes (
     "podcastId" text
 );
 
+
 --
 -- Name: feedUrls; Type: TABLE; Schema: public; Owner: postgres
 --
 
 CREATE TABLE "feedUrls" (
-    id text NOT NULL,
-    urls text[] DEFAULT ARRAY[]::text[],
-    "authorityUrl" text,
+    url text NOT NULL,
+    "isAuthority" boolean,
     "dateCreated" timestamp with time zone NOT NULL,
     "lastUpdated" timestamp with time zone NOT NULL,
     "podcastId" text
 );
+
 
 --
 -- Name: podcasts; Type: TABLE; Schema: public; Owner: postgres
@@ -70,6 +72,7 @@ CREATE TABLE podcasts (
     "lastUpdated" timestamp with time zone NOT NULL
 );
 
+
 --
 -- Name: episodes episodes_mediaUrl_key; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
@@ -91,14 +94,7 @@ ALTER TABLE ONLY episodes
 --
 
 ALTER TABLE ONLY "feedUrls"
-    ADD CONSTRAINT "feedUrls_pkey" PRIMARY KEY (id);
-
---
--- Name: podcasts podcasts_feedUrl_key; Type: CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY podcasts
-    ADD CONSTRAINT "podcasts_feedUrl_key" UNIQUE ("feedUrl");
+    ADD CONSTRAINT "feedUrls_pkey" PRIMARY KEY (url);
 
 
 --
@@ -107,6 +103,7 @@ ALTER TABLE ONLY podcasts
 
 ALTER TABLE ONLY podcasts
     ADD CONSTRAINT podcasts_pkey PRIMARY KEY (id);
+
 
 --
 -- Name: episodes episodes_podcastId_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
@@ -122,6 +119,7 @@ ALTER TABLE ONLY episodes
 
 ALTER TABLE ONLY "feedUrls"
     ADD CONSTRAINT "feedUrls_podcastId_fkey" FOREIGN KEY ("podcastId") REFERENCES podcasts(id) ON UPDATE CASCADE ON DELETE SET NULL;
+
 
 --
 -- PostgreSQL database dump complete
