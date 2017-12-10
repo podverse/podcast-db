@@ -1,7 +1,6 @@
 const
     sqlEngineFactory = require('../repositories/sequelize/engineFactory.js'),
     modelFactory = require('../repositories/sequelize/models'),
-    {parseFeedIfHasBeenUpdated} = require('./feedParser'),
     {postgresUri, queueUrl} = require('../config'),
     aws = require('aws-sdk');
 
@@ -25,14 +24,14 @@ function addFeedUrlsToSQSParsingQueue(params = {}) {
       // it hasn't been parsed. Definitely a flawed approach.
       if (params.onlyParseUnparsed) {
         queryObj = {
-          attributes: ['feedURL'],
+          attributes: ['feedUrl'],
           where: {
             title: null
           }
         };
       } else {
         queryObj = {
-          attributes: ['feedURL']
+          attributes: ['feedUrl']
         };
       }
 
@@ -41,11 +40,11 @@ function addFeedUrlsToSQSParsingQueue(params = {}) {
 
           let feedUrls = [];
           for (podcast of podcasts) {
-            feedUrls.push(podcast.feedURL);
+            feedUrls.push(podcast.feedUrl);
           }
 
           // AWS SQS has a max of 10 messages per batch message. This code breaks
-          // the feedURLs into chunks of 10, then calls the send batch message
+          // the feedUrls into chunks of 10, then calls the send batch message
           // operation once for each of those chunks of 10.
           let entryChunks = [];
           let tempChunk = [];
@@ -53,17 +52,7 @@ function addFeedUrlsToSQSParsingQueue(params = {}) {
           for (let [index, feedUrl] of feedUrls.entries()) {
             let entry = {
               Id: String(index),
-              MessageBody: feedUrl,
-              MessageAttributes: {
-                'shouldParseRecentEpisodes': {
-                  DataType: 'Number',
-                  StringValue: params.shouldParseRecentEpisodes ? '1' : '0'
-                },
-                'shouldParseMaxEpisodes': {
-                  DataType: 'Number',
-                  StringValue: params.shouldParseMaxEpisodes ? '1' : '0'
-                }
-              }
+              MessageBody: feedUrl
             }
 
             tempChunk.push(entry);
@@ -96,6 +85,9 @@ function addFeedUrlsToSQSParsingQueue(params = {}) {
 }
 
 function parseNextFeedFromQueue () {
+
+  console.log('parseNextFeedFromQueue');
+
   return new Promise((resolve, reject) => {
     let params = {
       QueueUrl: queueUrl,
@@ -104,12 +96,18 @@ function parseNextFeedFromQueue () {
     }
 
     sqs.receiveMessage(params, (err, data) => {
+
+      console.log('sqs.receiveMessage');
+      console.log(err);
+      console.log(data);
+
       if (err) {
         reject(err);
         return;
       }
 
       if (!data.Messages || data.Messages.length < 1) {
+        console.log('no messages!');
         reject('No messages returned.');
         return;
       }
@@ -117,16 +115,6 @@ function parseNextFeedFromQueue () {
       let parseParams = {};
       let message = data.Messages[0];
       let receiptHandle = message.ReceiptHandle;
-
-      if (message.MessageAttributes) {
-        let msgAttrs = message.MessageAttributes;
-        if (msgAttrs.shouldParseRecentEpisodes && msgAttrs.shouldParseRecentEpisodes.StringValue) {
-          parseParams.shouldParseRecentEpisodes = parseInt(msgAttrs.shouldParseRecentEpisodes.StringValue) === 1 ? true : false;
-        }
-        if (msgAttrs.shouldParseMaxEpisodes && msgAttrs.shouldParseMaxEpisodes.StringValue) {
-          parseParams.shouldParseMaxEpisodes = parseInt(msgAttrs.shouldParseMaxEpisodes.StringValue) === 1 ? true : false;
-        }
-      }
 
       let feedUrl = message.Body;
 

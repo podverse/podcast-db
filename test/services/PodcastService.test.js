@@ -1,5 +1,5 @@
 const
-    {configureDatabaseModels, createTestPodcastAndEpisode} = require('../helpers.js'),
+    {configureDatabaseModels} = require('../helpers.js'),
     PodcastService = require('../../src/services/podcast/PodcastService.js');
 
 describe('PodcastService', function () {
@@ -19,7 +19,7 @@ describe('PodcastService', function () {
   it('should be able to get a podcast by ID', function (done) {
 
     this.Models.Podcast
-      .create({feedURL: 'http://example.com/rss'})
+      .create({})
       .then(podcast => {
 
         this.podcastSvc.get(podcast.id, {})
@@ -35,7 +35,6 @@ describe('PodcastService', function () {
 
     this.Models.Podcast
       .create({
-        feedURL: 'http://example.com/rss',
         title: 'Some kind of title'
       })
       .then(podcast => {
@@ -51,19 +50,16 @@ describe('PodcastService', function () {
   it('should be able to retrieve all podcasts with expected attributes', function (done) {
 
     this.Models.Podcast.create({
-        feedURL: 'http://example.com/rss',
         title: 'Some kind of title',
-        imageURL: 'http://example.com/img'
+        imageUrl: 'http://example.com/img'
       })
       .then(() =>{
         this.Models.Podcast.create({
-          feedURL: 'http://example.com/rss2',
-          imageURL: 'http://example.com/img2'
+          imageUrl: 'http://example.com/img2'
         })
         .then(() =>{
           this.Models.Podcast.create({
-            feedURL: 'http://example.com/rss3',
-            imageURL: 'http://example.com/img3'
+            imageUrl: 'http://example.com/img3'
           })
           .then(() => {
             this.podcastSvc.retrieveAllPodcasts()
@@ -71,7 +67,7 @@ describe('PodcastService', function () {
                 expect(podcasts.length).to.equal(3);
                 expect(podcasts[0].id).to.exist;
                 expect(podcasts[0].title).to.exist;
-                expect(podcasts[0].imageURL).to.exist;
+                expect(podcasts[0].imageUrl).to.exist;
                 done();
               });
           })

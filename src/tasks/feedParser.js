@@ -18,109 +18,52 @@ EpisodeService = new EpisodeService();
 const sqlEngine = new sqlEngineFactory({uri: postgresUri});
 const Models = modelFactory(sqlEngine);
 
-function parseFeedIfHasBeenUpdated (feedURL, params = {}) {
-
-  return new Promise ((res, rej) => {
-
-    let {Podcast} = Models;
-    return Podcast.findOne({
-      where: {
-        feedURL: feedURL
-      },
-      attributes: ['lastBuildDate', 'lastPubDate']
-    })
-    .then(podcast => {
-      parseFeed(feedURL) // Without params, parseFeed will return podcast info but will not parse episodes
-        .then(parsedFeedObj => {
-          parseFeed(feedURL, params)
-            .then(fullParsedFeedObj => {
-              saveParsedFeedToDatabase(fullParsedFeedObj, res, rej);
-            })
-            .catch(err => {
-              console.log(parsedFeedObj.podcast.title);
-              console.log(feedURL);
-              rej(new errors.GeneralError(err));
-            })
-        });
-
-    })
-    .catch(err => {
-      console.log(feedURL);
-      rej(new errors.GeneralError(err));
-    });
-
-  });
-
-}
-
-function parseFeed (feedURL, params = {}) {
+function parseFeed (feedUrl, params = {}) {
 
   return new Promise ((resolve, reject) => {
+
+    let jsonString = '',
+    parsedEpisodes = [],
+    parsedPodcast = {};
 
     var options = {
       headers: {'user-agent': 'node.js'}
     }
 
     const feedParser = new FeedParser([]),
-          req = request(feedURL, options);
+          req = request(feedUrl, options);
 
     req.on('response', function (response) {
       let stream = this;
 
       if (response.statusCode != 200) {
-        console.log('feedURL with failing status code ', feedURL)
+        console.log('feedUrl with failing status code ', feedUrl)
         return this.emit('error', new errors.GeneralError('Bad status code'));
       }
 
       stream.pipe(feedParser);
     });
 
-    let jsonString = '',
-        episodeObjs = [],
-        podcastObj = {},
-        parsedFeedObj = {};
-
     feedParser.on('meta', function (meta) {
-      podcastObj = meta;
+      parsedPodcast = meta;
+    });
 
-      if (!params.shouldParseRecentEpisodes && !params.shouldParseMaxEpisodes) {
-        done();
+    feedParser.on('readable', function () {
+      let stream = this,
+          item;
+
+      while (item = stream.read()) {
+        parsedEpisodes.push(item);
+
+        if (parsedEpisodes.length >= 10000) {
+          stream.emit('end');
+        }
       }
 
     });
 
-    if (params.shouldParseRecentEpisodes) {
-      feedParser.on('readable', function () {
-        let stream = this,
-            item;
-
-        while (item = stream.read()) {
-          episodeObjs.push(item);
-
-          if (episodeObjs.length >= 10) {
-            stream.emit('end');
-          }
-        }
-
-      });
-    } else if (params.shouldParseMaxEpisodes) {
-      feedParser.on('readable', function () {
-        let stream = this,
-            item;
-
-        while (item = stream.read()) {
-          episodeObjs.push(item);
-
-          if (episodeObjs.length >= 10000) {
-            stream.emit('end');
-          }
-        }
-
-      });
-    }
-
     req.on('error', function (e) {
-      console.log('feedURL', feedURL);
+      console.log('feedUrl', feedUrl);
       console.log(e);
       reject(e);
     });
@@ -129,50 +72,41 @@ function parseFeed (feedURL, params = {}) {
 
     function done () {
 
-      // Always use the feedURL we provide. We use feedURLs as the (flawed) unique id
-      // of podcasts, so we want to avoid changing the feedURL of a podcast
-      // unless we explicitly tell it to.
-      podcastObj.xmlurl = feedURL;
-
       // TODO: Don't assume that the most recent episode is in the 0 position of
       // the array. Instead find the title based on episode with the most recent
       // pubDate.
-      if (episodeObjs.length > 0) {
-        podcastObj.lastEpisodeTitle = episodeObjs[0].title;
+      if (parsedEpisodes.length > 0) {
+        parsedPodcast.lastEpisodeTitle = parsedEpisodes[0].title;
       }
 
-      podcastObj.totalAvailableEpisodes = episodeObjs.length;
+      parsedPodcast.totalAvailableEpisodes = parsedEpisodes.length;
 
-      parsedFeedObj.podcast = podcastObj;
-      parsedFeedObj.episodes = episodeObjs;
-      resolve(parsedFeedObj);
+      saveParsedFeedToDatabase(parsedPodcast, parsedEpisodes, resolve, reject);
+
     }
 
   });
 
 }
 
-function saveParsedFeedToDatabase (parsedFeedObj, res, rej) {
+function saveParsedFeedToDatabase (parsedPodcast, parsedEpisodes, resolve, reject) {
 
   const {Episode, Podcast} = Models;
 
-  let podcast = parsedFeedObj.podcast;
-  let episodes = parsedFeedObj.episodes || [];
-
   // Reduce the episodes array to 10000 items, in case someone maliciously tries
   // to overload the database
-  episodes = episodes.slice(0, 10000);
+  parsedEpisodes = parsedEpisodes.slice(0, 10000);
 
   // Override fields as needed for specific podcasts
-  podcast = podcastOverride(podcast);
+  parsedPodcast = podcastOverride(parsedPodcast);
 
-  return PodcastService.findOrCreatePodcast(podcast)
+  return PodcastService.findOrCreatePodcastFromParsing(parsedPodcast)
     .then(podcastId => {
 
       return EpisodeService.setAllEpisodesToNotPublic(podcastId)
         .then(() => {
 
-          return promiseChain = episodes.reduce((promise, ep) => {
+          return promiseChain = parsedEpisodes.reduce((promise, ep) => {
             if (!ep.enclosures || !ep.enclosures[0] || !ep.enclosures[0].url) {
               return promise
             }
@@ -193,21 +127,21 @@ function saveParsedFeedToDatabase (parsedFeedObj, res, rej) {
 
             return promise.then(() => {
               let prunedEpisode = pruneEpisode(ep);
-              return EpisodeService.findOrCreateEpisode(prunedEpisode, podcast.id);
+              return EpisodeService.findOrCreateEpisode(prunedEpisode, parsedPodcast.id);
             })
             .catch(e => {
               console.log(ep.title);
               console.log(ep.enclosures[0].url);
-              rej(new errors.GeneralError(e));
+              reject(new errors.GeneralError(e));
             });
           }, Promise.resolve());
         });
     })
     .then(() => {
-      res();
+      resolve();
     })
     .catch((e) => {
-      rej(new errors.GeneralError(e));
+      reject(new errors.GeneralError(e));
     })
 
 }
@@ -215,13 +149,13 @@ function saveParsedFeedToDatabase (parsedFeedObj, res, rej) {
 function pruneEpisode(ep) {
   let prunedEpisode = {};
 
-  if (ep.image && ep.image.url) { prunedEpisode.imageURL = ep.image.url }
+  if (ep.image && ep.image.url) { prunedEpisode.imageUrl = ep.image.url }
   if (ep.title) { prunedEpisode.title = ep.title }
   if (ep.description) { prunedEpisode.summary = ep.description }
   if (ep.duration) { prunedEpisode.duration }
   if (ep.link) { prunedEpisode.link = ep.link }
   if (ep.enclosures && ep.enclosures[0]) {
-    if (ep.enclosures[0].url) { prunedEpisode.mediaURL = ep.enclosures[0].url }
+    if (ep.enclosures[0].url) { prunedEpisode.mediaUrl = ep.enclosures[0].url }
     if (ep.enclosures[0].length) { prunedEpisode.mediaBytes = ep.enclosures[0].length }
     if (ep.enclosures[0].type) { prunedEpisode.mediaType = ep.enclosures[0].type }
   }
@@ -232,6 +166,5 @@ function pruneEpisode(ep) {
 
 module.exports = {
   parseFeed,
-  parseFeedIfHasBeenUpdated,
   saveParsedFeedToDatabase
 }

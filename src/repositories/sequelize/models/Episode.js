@@ -18,7 +18,7 @@ module.exports = function(sequelize, DataTypes) {
       }
     },
 
-    mediaURL: {
+    mediaUrl: {
       type: DataTypes.TEXT,
       validation: {
         isUrl: true
@@ -26,7 +26,7 @@ module.exports = function(sequelize, DataTypes) {
       unique: true
     },
 
-    imageURL: {
+    imageUrl: {
       type: DataTypes.TEXT,
       validate: {
         isUrl: true

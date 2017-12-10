@@ -1,5 +1,5 @@
 const
-    {parseFeedIfHasBeenUpdated} = require('./tasks/feedParser.js'),
+    {parseFeed} = require('./tasks/feedParser.js'),
     {addFeedUrlsToSQSParsingQueue,
      parseNextFeedFromQueue,
      deleteSQSMessage} = require('./tasks/sqsQueue.js');
@@ -11,7 +11,7 @@ function addFeedUrlsToParsingQueue (params = {}) {
 function parseNextFeed () {
   parseNextFeedFromQueue()
     .then(arr => {
-      return parseFeedIfHasBeenUpdated(arr[0], arr[1]) // feedURL, params
+      return parseFeed(arr[0], arr[1]) // feedUrl, params
         .then(() => {
           deleteSQSMessage(arr[2]); // receiptHandle
         })

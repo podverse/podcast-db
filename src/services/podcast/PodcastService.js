@@ -20,11 +20,11 @@ class PodcastService extends SequelizeService {
   get (id, params={}) {
     const {Episode} = this.Models;
 
-    if (typeof params.feedURL !== 'undefined' && params.feedURL.length > 0) {
+    if (typeof params.feedUrl !== 'undefined' && params.feedUrl.length > 0) {
 
       return this.Model.findOne({
         where: {
-          feedURL: params.feedURL,
+          feedUrl: params.feedUrl,
         }
       }).then(podcast => {
         return podcast;
@@ -35,7 +35,7 @@ class PodcastService extends SequelizeService {
       params.sequelize = {
         include: [{
           model: Episode,
-          attributes: ['id', 'title', 'mediaURL', 'pubDate', 'summary', 'isPublic']
+          attributes: ['id', 'title', 'mediaUrl', 'pubDate', 'summary', 'isPublic']
         }]
       }
 
@@ -51,21 +51,11 @@ class PodcastService extends SequelizeService {
     if (typeof params.query !== 'undefined' && typeof params.query.title !== 'undefined' && params.query.title.length > 0) {
       let title = params.query.title || '';
       params.sequelize = {
-        attributes: ['id', 'feedURL', 'title'],
+        attributes: ['id', 'title'],
         where: ['title ILIKE ?', '%' + title + '%']
       }
       return super.find(params);
 
-    }
-    // Search for podcast by feedURL
-    else if (typeof params.query !== 'undefined' && typeof params.query.feedURL !== 'undefined' && params.query.feedURL.length > 0) {
-      params.sequelize = {
-        attributes: ['id', 'feedURL', 'title'],
-        where: {
-          feedURL: params.query.feedURL
-        }
-      }
-      return super.find(params);
     }
     else {
       // TODO: how do we show a 404 not found page here when the user navs to /podcasts/?
@@ -73,18 +63,24 @@ class PodcastService extends SequelizeService {
     }
   }
 
-  findOrCreatePodcast (podcast) {
+  findOrCreatePodcastFromParsing (parsedPodcast) {
+
+    let podcast = parsedPodcast;
+
     return this.Model.findOrCreate({
       where: {
-        feedURL: podcast.xmlurl
+        title: podcast.title
+      },
+      default: {
+        title: podcast.title
       }
     })
     .then((podcastArray) => {
       podcast.id = podcastArray[0].id;
 
       return this.Model.upsert({
-        feedURL: podcast.xmlurl,
-        imageURL: podcast.image.url,
+        feedUrl: podcast.xmlurl,
+        imageUrl: podcast.image.url,
         summary: podcast.description,
         title: podcast.title,
         author: podcast.author,
@@ -107,7 +103,7 @@ class PodcastService extends SequelizeService {
 
   retrieveAllPodcasts () {
     return sqlEngine.query(`
-      SELECT p.title, p."imageURL", p.id, p."lastEpisodeTitle", p."totalAvailableEpisodes", (
+      SELECT p.title, p."imageUrl", p.id, p."lastEpisodeTitle", p."totalAvailableEpisodes", (
         SELECT MAX("pubDate") FROM episodes WHERE "podcastId"=p.id
       ) AS "lastEpisodePubDate"
       FROM podcasts p;

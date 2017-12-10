@@ -2,7 +2,7 @@
 -- PostgreSQL database dump
 --
 
--- Dumped from database version 9.6.1
+-- Dumped from database version 9.6.6
 -- Dumped by pg_dump version 9.6.1
 
 --
@@ -11,8 +11,8 @@
 
 CREATE TABLE episodes (
     id text NOT NULL,
-    "mediaURL" text,
-    "imageURL" text,
+    "mediaUrl" text,
+    "imageUrl" text,
     title text,
     summary text,
     duration integer,
@@ -20,6 +20,26 @@ CREATE TABLE episodes (
     "mediaBytes" integer,
     "mediaType" text,
     "pubDate" timestamp with time zone,
+    "isPublic" boolean DEFAULT false,
+    "pastHourTotalUniquePageviews" integer DEFAULT 0,
+    "pastDayTotalUniquePageviews" integer DEFAULT 0,
+    "pastWeekTotalUniquePageviews" integer DEFAULT 0,
+    "pastMonthTotalUniquePageviews" integer DEFAULT 0,
+    "pastYearTotalUniquePageviews" integer DEFAULT 0,
+    "allTimeTotalUniquePageviews" integer DEFAULT 0,
+    "dateCreated" timestamp with time zone NOT NULL,
+    "lastUpdated" timestamp with time zone NOT NULL,
+    "podcastId" text
+);
+
+--
+-- Name: feedUrls; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE "feedUrls" (
+    id text NOT NULL,
+    urls text[] DEFAULT ARRAY[]::text[],
+    "authorityUrl" text,
     "dateCreated" timestamp with time zone NOT NULL,
     "lastUpdated" timestamp with time zone NOT NULL,
     "podcastId" text
@@ -31,23 +51,31 @@ CREATE TABLE episodes (
 
 CREATE TABLE podcasts (
     id text NOT NULL,
-    "feedURL" text,
-    "imageURL" text,
+    "imageUrl" text,
     summary text,
     title text,
     author text,
     "lastBuildDate" timestamp with time zone,
     "lastPubDate" timestamp with time zone,
+    "lastEpisodeTitle" text,
+    "totalAvailableEpisodes" integer,
+    categories text[] DEFAULT ARRAY[]::text[],
+    "pastHourTotalUniquePageviews" integer DEFAULT 0,
+    "pastDayTotalUniquePageviews" integer DEFAULT 0,
+    "pastWeekTotalUniquePageviews" integer DEFAULT 0,
+    "pastMonthTotalUniquePageviews" integer DEFAULT 0,
+    "pastYearTotalUniquePageviews" integer DEFAULT 0,
+    "allTimeTotalUniquePageviews" integer DEFAULT 0,
     "dateCreated" timestamp with time zone NOT NULL,
     "lastUpdated" timestamp with time zone NOT NULL
 );
 
 --
--- Name: episodes episodes_mediaURL_key; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: episodes episodes_mediaUrl_key; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY episodes
-    ADD CONSTRAINT "episodes_mediaURL_key" UNIQUE ("mediaURL");
+    ADD CONSTRAINT "episodes_mediaUrl_key" UNIQUE ("mediaUrl");
 
 
 --
@@ -59,11 +87,18 @@ ALTER TABLE ONLY episodes
 
 
 --
--- Name: podcasts podcasts_feedURL_key; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: feedUrls feedUrls_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY "feedUrls"
+    ADD CONSTRAINT "feedUrls_pkey" PRIMARY KEY (id);
+
+--
+-- Name: podcasts podcasts_feedUrl_key; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY podcasts
-    ADD CONSTRAINT "podcasts_feedURL_key" UNIQUE ("feedURL");
+    ADD CONSTRAINT "podcasts_feedUrl_key" UNIQUE ("feedUrl");
 
 
 --
@@ -73,7 +108,6 @@ ALTER TABLE ONLY podcasts
 ALTER TABLE ONLY podcasts
     ADD CONSTRAINT podcasts_pkey PRIMARY KEY (id);
 
-
 --
 -- Name: episodes episodes_podcastId_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
@@ -81,6 +115,13 @@ ALTER TABLE ONLY podcasts
 ALTER TABLE ONLY episodes
     ADD CONSTRAINT "episodes_podcastId_fkey" FOREIGN KEY ("podcastId") REFERENCES podcasts(id) ON UPDATE CASCADE ON DELETE SET NULL;
 
+
+--
+-- Name: feedUrls feedUrls_podcastId_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY "feedUrls"
+    ADD CONSTRAINT "feedUrls_podcastId_fkey" FOREIGN KEY ("podcastId") REFERENCES podcasts(id) ON UPDATE CASCADE ON DELETE SET NULL;
 
 --
 -- PostgreSQL database dump complete
