@@ -5,4 +5,6 @@ config.postgresUri = process.env.postgresUri || 'postgres://postgres:password@12
 
 config.queueUrl = process.env.queueUrl || '';
 
+config.awsRegion = 'us-east-1';
+
 module.exports = config;

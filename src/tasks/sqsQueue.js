@@ -1,13 +1,13 @@
 const
     sqlEngineFactory = require('../repositories/sequelize/engineFactory.js'),
     modelFactory = require('../repositories/sequelize/models'),
-    {postgresUri, queueUrl} = require('../config'),
+    {postgresUri, queueUrl, awsRegion} = require('../config'),
     aws = require('aws-sdk');
 
 const sqlEngine = new sqlEngineFactory({uri: postgresUri});
 const Models = modelFactory(sqlEngine);
 
-aws.config.update({region:'us-west-2'});
+aws.config.update({region: awsRegion});
 const sqs = new aws.SQS();
 
 function addFeedUrlsToSQSParsingQueue(params = {}) {
@@ -16,31 +16,21 @@ function addFeedUrlsToSQSParsingQueue(params = {}) {
     purgeSQSFeedQueue(resolve, reject)
   })
     .then(() => {
-      let {Podcast} = Models;
+      let {FeedUrl} = Models;
 
-      let queryObj;
+      let queryObj = {
+        attributes: ['url'],
+        where: {
+          isAuthority: true
+        }
+      };
 
-      // NOTE: onlyParseUnparsed assumes if a podcast doesn't have a title then
-      // it hasn't been parsed. Definitely a flawed approach.
-      if (params.onlyParseUnparsed) {
-        queryObj = {
-          attributes: ['feedUrl'],
-          where: {
-            title: null
-          }
-        };
-      } else {
-        queryObj = {
-          attributes: ['feedUrl']
-        };
-      }
+      return FeedUrl.findAll(queryObj)
+        .then(feedUrls => {
 
-      return Podcast.findAll(queryObj)
-        .then(podcasts => {
-
-          let feedUrls = [];
-          for (podcast of podcasts) {
-            feedUrls.push(podcast.feedUrl);
+          let urls = [];
+          for (feedUrl of feedUrls) {
+            urls.push(feedUrl.url);
           }
 
           // AWS SQS has a max of 10 messages per batch message. This code breaks
@@ -49,7 +39,7 @@ function addFeedUrlsToSQSParsingQueue(params = {}) {
           let entryChunks = [];
           let tempChunk = [];
 
-          for (let [index, feedUrl] of feedUrls.entries()) {
+          for (let [index, feedUrl] of urls.entries()) {
             let entry = {
               Id: String(index),
               MessageBody: feedUrl
@@ -57,7 +47,7 @@ function addFeedUrlsToSQSParsingQueue(params = {}) {
 
             tempChunk.push(entry);
 
-            if ((index + 1) % 10 === 0 || index === feedUrls.length - 1) {
+            if ((index + 1) % 10 === 0 || index === urls.length - 1) {
               entryChunks.push(tempChunk);
               tempChunk = [];
             }
