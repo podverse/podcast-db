@@ -76,8 +76,6 @@ function addFeedUrlsToSQSParsingQueue(params = {}) {
 
 function parseNextFeedFromQueue () {
 
-  console.log('parseNextFeedFromQueue');
-
   return new Promise((resolve, reject) => {
     let params = {
       QueueUrl: queueUrl,
@@ -87,9 +85,7 @@ function parseNextFeedFromQueue () {
 
     sqs.receiveMessage(params, (err, data) => {
 
-      console.log('sqs.receiveMessage');
       console.log(err);
-      console.log(data);
 
       if (err) {
         reject(err);
