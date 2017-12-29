@@ -23,38 +23,50 @@ function configureDatabaseModels (resolve) {
   });
 }
 
-function createTestPodcastAndEpisode (Models) {
+function createTestPodcastFeedUrlAndEpisode (Models) {
 
-  const {Podcast, Episode} = Models;
+  const {Podcast, FeedUrl, Episode} = Models;
 
   return Podcast.findOrCreate({
     where: {
-      'feedURL': 'http://example.com/test333'
+      'title': 'Most interesting podcast in the world'
     },
-    defaults: {
-      'feedURL': 'http://example.com/test333',
+    default: {
       'title': 'Most interesting podcast in the world'
     }
   })
     .then(podcasts => {
+      let podcast = podcasts[0];
 
       return Promise.all([
-        Promise.resolve(podcasts),
+        podcasts,
         Episode.findOrCreate({
           where: {
-            mediaURL: 'http://example.com/test999'
+            mediaUrl: 'http://example.com/test999'
           },
-          defaults: Object.assign({}, {}, {
-            feedURL: 'http://example.com/test999',
+          default: {
+            mediaUrl: 'http://example.com/test999',
             title: 'Best episode in the history of time',
-            podcastId: podcasts[0].id
-          })
+            podcastId: podcast.id
+          }
+        }),
+        FeedUrl.findOrCreate({
+          where: {
+            url: 'http://example.com/test333'
+          },
+          default: {
+            url: 'http://example.com/test333',
+            isAuthority: true,
+            podcastId: podcast.id
+          }
         })
-      ]);
+      ])
+
     });
+
 }
 
 module.exports = {
   configureDatabaseModels,
-  createTestPodcastAndEpisode
+  createTestPodcastFeedUrlAndEpisode
 }

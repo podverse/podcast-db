@@ -20,12 +20,12 @@ class EpisodeService extends SequelizeService {
   get (id, params={}) {
     const {Podcast} = this.Models;
 
-    if (typeof params.mediaURL !== 'undefined' && params.mediaURL.length > 0) {
-      let mediaURL = params.mediaURL;
+    if (typeof params.mediaUrl !== 'undefined' && params.mediaUrl.length > 0) {
+      let mediaUrl = params.mediaUrl;
 
       return this.Model.findOne({
         where: {
-          mediaURL: mediaURL,
+          mediaUrl: mediaUrl,
         },
         include: [Podcast]
       }).then(episode => {
@@ -44,19 +44,19 @@ class EpisodeService extends SequelizeService {
   find (params={}) {
     const {Podcast} = this.Models;
 
-    // Find an Episode by mediaURL, and include its Podcast.
-    if (typeof params.mediaURL !== 'undefined' && params.mediaURL.length > 0) {
-      let mediaURL = params.mediaURL;
+    // Find an Episode by mediaUrl, and include its Podcast.
+    if (typeof params.mediaUrl !== 'undefined' && params.mediaUrl.length > 0) {
+      let mediaUrl = params.mediaUrl;
       params.sequelize = {
         where: {
-          mediaURL: mediaURL
+          mediaUrl: mediaUrl
         },
         include: [Podcast]
       }
     } else if (params.includePodcastTitle) {
       params.sequelize.include = [{
         model: Podcast,
-        attributes: ['title', 'imageURL']
+        attributes: ['title', 'imageUrl']
       }]
     }
 
@@ -66,7 +66,7 @@ class EpisodeService extends SequelizeService {
   findOrCreateEpisode(episode, podcastId) {
     return this.Model.findOrCreate({
       where: {
-        mediaURL: episode.mediaURL
+        mediaUrl: episode.mediaUrl
       },
       defaults: Object.assign({}, episode, {
         podcastId: podcastId
@@ -74,8 +74,8 @@ class EpisodeService extends SequelizeService {
     })
     .then(() => {
       return this.Model.upsert({
-        mediaURL: episode.mediaURL,
-        imageURL: episode.imageURL,
+        mediaUrl: episode.mediaUrl,
+        imageUrl: episode.imageUrl,
         title: episode.title,
         summary: episode.summary,
         duration: episode.duration,
@@ -88,7 +88,7 @@ class EpisodeService extends SequelizeService {
     })
     .catch(err => {
       console.log(episode.title);
-      console.log(episode.mediaURL);
+      console.log(episode.mediaUrl);
       console.log(err);
     })
   }

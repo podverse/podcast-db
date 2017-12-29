@@ -14,15 +14,7 @@ module.exports = function(sequelize, DataTypes) {
       }
     },
 
-    feedURL: {
-      type: DataTypes.TEXT,
-      validate: {
-        isUrl: true
-      },
-      unique: true
-    },
-
-    imageURL: {
+    imageUrl: {
       type: DataTypes.TEXT,
       validate: {
         isUrl: true

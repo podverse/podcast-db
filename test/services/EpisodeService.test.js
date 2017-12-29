@@ -1,5 +1,5 @@
 const
-    {configureDatabaseModels, createTestPodcastAndEpisode} = require('../helpers.js'),
+    {configureDatabaseModels, createTestPodcastFeedUrlAndEpisode} = require('../helpers.js'),
     EpisodeService = require('../../src/services/episode/EpisodeService.js');
 
 describe('EpisodeService', function () {
@@ -10,8 +10,8 @@ describe('EpisodeService', function () {
 
   beforeEach(function (done) {
     this.episodeSvc = new EpisodeService();
-    createTestPodcastAndEpisode(this.Models)
-      .then(([podcasts, episodes]) => {
+    createTestPodcastFeedUrlAndEpisode(this.Models)
+      .then(([podcasts, episodes, feedUrls]) => {
         this.episode = episodes[0];
         done();
       });

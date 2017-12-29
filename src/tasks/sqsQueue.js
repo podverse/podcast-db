@@ -1,14 +1,13 @@
 const
     sqlEngineFactory = require('../repositories/sequelize/engineFactory.js'),
     modelFactory = require('../repositories/sequelize/models'),
-    {parseFeedIfHasBeenUpdated} = require('./feedParser'),
-    {postgresUri, queueUrl} = require('../config'),
+    {postgresUri, queueUrl, awsRegion} = require('../config'),
     aws = require('aws-sdk');
 
 const sqlEngine = new sqlEngineFactory({uri: postgresUri});
 const Models = modelFactory(sqlEngine);
 
-aws.config.update({region:'us-west-2'});
+aws.config.update({region: awsRegion});
 const sqs = new aws.SQS();
 
 function addFeedUrlsToSQSParsingQueue(params = {}) {
@@ -17,58 +16,38 @@ function addFeedUrlsToSQSParsingQueue(params = {}) {
     purgeSQSFeedQueue(resolve, reject)
   })
     .then(() => {
-      let {Podcast} = Models;
+      let {FeedUrl} = Models;
 
-      let queryObj;
+      let queryObj = {
+        attributes: ['url'],
+        where: {
+          isAuthority: true
+        }
+      };
 
-      // NOTE: onlyParseUnparsed assumes if a podcast doesn't have a title then
-      // it hasn't been parsed. Definitely a flawed approach.
-      if (params.onlyParseUnparsed) {
-        queryObj = {
-          attributes: ['feedURL'],
-          where: {
-            title: null
-          }
-        };
-      } else {
-        queryObj = {
-          attributes: ['feedURL']
-        };
-      }
+      return FeedUrl.findAll(queryObj)
+        .then(feedUrls => {
 
-      return Podcast.findAll(queryObj)
-        .then(podcasts => {
-
-          let feedUrls = [];
-          for (podcast of podcasts) {
-            feedUrls.push(podcast.feedURL);
+          let urls = [];
+          for (feedUrl of feedUrls) {
+            urls.push(feedUrl.url);
           }
 
           // AWS SQS has a max of 10 messages per batch message. This code breaks
-          // the feedURLs into chunks of 10, then calls the send batch message
+          // the feedUrls into chunks of 10, then calls the send batch message
           // operation once for each of those chunks of 10.
           let entryChunks = [];
           let tempChunk = [];
 
-          for (let [index, feedUrl] of feedUrls.entries()) {
+          for (let [index, feedUrl] of urls.entries()) {
             let entry = {
               Id: String(index),
-              MessageBody: feedUrl,
-              MessageAttributes: {
-                'shouldParseRecentEpisodes': {
-                  DataType: 'Number',
-                  StringValue: params.shouldParseRecentEpisodes ? '1' : '0'
-                },
-                'shouldParseMaxEpisodes': {
-                  DataType: 'Number',
-                  StringValue: params.shouldParseMaxEpisodes ? '1' : '0'
-                }
-              }
+              MessageBody: feedUrl
             }
 
             tempChunk.push(entry);
 
-            if ((index + 1) % 10 === 0 || index === feedUrls.length - 1) {
+            if ((index + 1) % 10 === 0 || index === urls.length - 1) {
               entryChunks.push(tempChunk);
               tempChunk = [];
             }
@@ -96,6 +75,7 @@ function addFeedUrlsToSQSParsingQueue(params = {}) {
 }
 
 function parseNextFeedFromQueue () {
+
   return new Promise((resolve, reject) => {
     let params = {
       QueueUrl: queueUrl,
@@ -104,12 +84,16 @@ function parseNextFeedFromQueue () {
     }
 
     sqs.receiveMessage(params, (err, data) => {
+
+      console.log(err);
+
       if (err) {
         reject(err);
         return;
       }
 
       if (!data.Messages || data.Messages.length < 1) {
+        console.log('no messages!');
         reject('No messages returned.');
         return;
       }
@@ -117,16 +101,6 @@ function parseNextFeedFromQueue () {
       let parseParams = {};
       let message = data.Messages[0];
       let receiptHandle = message.ReceiptHandle;
-
-      if (message.MessageAttributes) {
-        let msgAttrs = message.MessageAttributes;
-        if (msgAttrs.shouldParseRecentEpisodes && msgAttrs.shouldParseRecentEpisodes.StringValue) {
-          parseParams.shouldParseRecentEpisodes = parseInt(msgAttrs.shouldParseRecentEpisodes.StringValue) === 1 ? true : false;
-        }
-        if (msgAttrs.shouldParseMaxEpisodes && msgAttrs.shouldParseMaxEpisodes.StringValue) {
-          parseParams.shouldParseMaxEpisodes = parseInt(msgAttrs.shouldParseMaxEpisodes.StringValue) === 1 ? true : false;
-        }
-      }
 
       let feedUrl = message.Body;
 
