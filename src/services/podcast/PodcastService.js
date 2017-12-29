@@ -66,7 +66,7 @@ class PodcastService extends SequelizeService {
       podcast.id = podcastArray[0].id;
 
       return this.Model.upsert({
-        feedUrl: podcast.xmlurl,
+        id: podcast.id,
         imageUrl: podcast.image.url,
         summary: podcast.description,
         title: podcast.title,
