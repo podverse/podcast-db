@@ -10,10 +10,12 @@ const
     _ = require('lodash');
 
 let PodcastService = require('../services/podcast/PodcastService.js'),
-    EpisodeService = require('../services/episode/EpisodeService.js');
+    EpisodeService = require('../services/episode/EpisodeService.js'),
+    FeedUrlService = require('../services/feedUrl/FeedUrlService.js');
 
 PodcastService = new PodcastService();
 EpisodeService = new EpisodeService();
+FeedUrlService = new FeedUrlService();
 
 const sqlEngine = new sqlEngineFactory({uri: postgresUri});
 const Models = modelFactory(sqlEngine);
@@ -81,7 +83,7 @@ function parseFeed (feedUrl, params = {}) {
 
       parsedPodcast.totalAvailableEpisodes = parsedEpisodes.length;
 
-      saveParsedFeedToDatabase(parsedPodcast, parsedEpisodes, resolve, reject);
+      saveParsedFeedToDatabase(parsedPodcast, parsedEpisodes, feedUrl, resolve, reject);
 
     }
 
@@ -89,7 +91,9 @@ function parseFeed (feedUrl, params = {}) {
 
 }
 
-function saveParsedFeedToDatabase (parsedPodcast, parsedEpisodes, resolve, reject) {
+// TODO: if a feedUrl does not already have a podcast associated with it AND
+//       it has isAuthority == true...
+function saveParsedFeedToDatabase (parsedPodcast, parsedEpisodes, feedUrl, resolve, reject) {
 
   const {Episode, Podcast} = Models;
 
@@ -103,39 +107,44 @@ function saveParsedFeedToDatabase (parsedPodcast, parsedEpisodes, resolve, rejec
   return PodcastService.findOrCreatePodcastFromParsing(parsedPodcast)
     .then(podcastId => {
 
-      return EpisodeService.setAllEpisodesToNotPublic(podcastId)
+      return FeedUrlService.findOrCreateFeedUrl(feedUrl, podcastId, true)
         .then(() => {
 
-          return promiseChain = parsedEpisodes.reduce((promise, ep) => {
-            if (!ep.enclosures || !ep.enclosures[0] || !ep.enclosures[0].url) {
-              return promise
-            }
+          return EpisodeService.setAllEpisodesToNotPublic(podcastId)
+            .then(() => {
 
-            // NOTE: in rare cases a podcast feed may have multiple enclosures. The
-            // check below looks for the first enclosure with a type that contains
-            // the string 'audio', then uses that. Else do not save the episode.
-            // Example: History on Fire (http://feeds.podtrac.com/xUnmFXZLuavF)
-            if (ep.enclosures.length > 1) {
-              let audioEnclosure = _.find(ep.enclosures, function (enclosure) {
-                if (enclosure.type && (enclosure.type.indexOf('audio') > -1)) {
-                  return enclosure
+              return promiseChain = parsedEpisodes.reduce((promise, ep) => {
+                if (!ep.enclosures || !ep.enclosures[0] || !ep.enclosures[0].url) {
+                  return promise
                 }
-              });
-              ep.enclosures = [];
-              ep.enclosures.push(audioEnclosure);
-            }
 
-            return promise.then(() => {
-              let prunedEpisode = pruneEpisode(ep);
-              return EpisodeService.findOrCreateEpisode(prunedEpisode, parsedPodcast.id);
-            })
-            .catch(e => {
-              console.log(ep.title);
-              console.log(ep.enclosures[0].url);
-              reject(new errors.GeneralError(e));
+                // NOTE: in rare cases a podcast feed may have multiple enclosures. The
+                // check below looks for the first enclosure with a type that contains
+                // the string 'audio', then uses that. Else do not save the episode.
+                // Example: History on Fire (http://feeds.podtrac.com/xUnmFXZLuavF)
+                if (ep.enclosures.length > 1) {
+                  let audioEnclosure = _.find(ep.enclosures, function (enclosure) {
+                    if (enclosure.type && (enclosure.type.indexOf('audio') > -1)) {
+                      return enclosure
+                    }
+                  });
+                  ep.enclosures = [];
+                  ep.enclosures.push(audioEnclosure);
+                }
+
+                return promise.then(() => {
+                  let prunedEpisode = pruneEpisode(ep);
+                  return EpisodeService.findOrCreateEpisode(prunedEpisode, podcastId);
+                })
+                .catch(e => {
+                  console.log(ep.title);
+                  console.log(ep.enclosures[0].url);
+                  reject(new errors.GeneralError(e));
+                });
+              }, Promise.resolve());
             });
-          }, Promise.resolve());
-        });
+        })
+
     })
     .then(() => {
       resolve();

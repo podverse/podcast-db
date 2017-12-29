@@ -7,11 +7,11 @@
 
 ---
 
-node -e 'require("./src/tasks/feedParser.js").parseFeed("http://feeds.feedburner.com/TheAdamCarollaPodcast", params); require("./src/tasks/feedParser.js").parseFeed("http://joeroganexp.joerogan.libsynpro.com/rss", params); require("./src/tasks/feedParser.js").parseFeed("http://feeds.feedburner.com/dancarlin/commonsense?format=xml", params)'
+node -e 'require("./src/tasks/feedParser.js").parseFeed("http://feeds.feedburner.com/TheAdamCarollaPodcast"); require("./src/tasks/feedParser.js").parseFeed("http://joeroganexp.joerogan.libsynpro.com/rss"); require("./src/tasks/feedParser.js").parseFeed("http://feeds.feedburner.com/dancarlin/commonsense?format=xml")'
 
 ---
 
-node -e 'require("./src/tasks/feedParser.js").parseFeed("http://feeds.feedburner.com/DuncanTrussell"); require("./src/tasks/feedParser.js").parseFeed("http://joeroganexp.joerogan.libsynpro.com/rss"); require("./src/tasks/feedParser.js").parseFeed("http://feeds.feedburner.com/dancarlin/commonsense")'
+node -e 'require("./src/tasks/feedParser.js").parseFeed("http://feeds.feedburner.com/DuncanTrussell")'
 
 ---
 

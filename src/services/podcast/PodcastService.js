@@ -20,27 +20,14 @@ class PodcastService extends SequelizeService {
   get (id, params={}) {
     const {Episode} = this.Models;
 
-    if (typeof params.feedUrl !== 'undefined' && params.feedUrl.length > 0) {
-
-      return this.Model.findOne({
-        where: {
-          feedUrl: params.feedUrl,
-        }
-      }).then(podcast => {
-        return podcast;
-      });
-
-    } else {
-      // Retrieve podcast and its episode ids and titles only
-      params.sequelize = {
-        include: [{
-          model: Episode,
-          attributes: ['id', 'title', 'mediaUrl', 'pubDate', 'summary', 'isPublic']
-        }]
-      }
-
-      return super.get(id, params);
+    params.sequelize = {
+      include: [{
+        model: Episode,
+        attributes: ['id', 'title', 'mediaUrl', 'pubDate', 'summary', 'isPublic']
+      }]
     }
+
+    return super.get(id, params);
 
   }
 
@@ -108,6 +95,29 @@ class PodcastService extends SequelizeService {
       ) AS "lastEpisodePubDate"
       FROM podcasts p;
     `, { type: sqlEngine.QueryTypes.SELECT });
+  }
+
+  findPodcastByFeedUrl(url) {
+    const {FeedUrl} = this.Models;
+
+    return FeedUrl.find({
+      where: {
+        url: url
+      }
+    })
+    .then(feedUrl => {
+
+      if (feedUrl && feedUrl.podcastId) {
+
+        return this.get(feedUrl.podcastId)
+        .then(podcast => {
+          return podcast
+        })
+
+      } else {
+        throw new errors.GeneralError('FeedUrl not found');
+      }
+    })
   }
 
 }
