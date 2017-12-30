@@ -90,6 +90,61 @@ class FeedUrlService extends SequelizeService {
     })
   }
 
+  findAllRelatedFeedUrls(urls) {
+
+    if (!urls || (urls && urls.length < 1)) {
+
+      return new Promise((resolve, reject) => {
+        resolve([]);
+      });
+
+    } else {
+
+      return this.find({
+        sequelize: {
+          where: {
+            url: urls
+          }
+        }
+      })
+      .then(feedUrls => {
+
+        if (feedUrls && feedUrls.length > 0) {
+
+          let podcastId = feedUrls[0].podcastId;
+
+          return this.find({
+            sequelize: {
+              where: {
+                podcastId: podcastId
+              }
+            }
+          })
+          .then(relatedUrls => {
+
+            let relatedFeedUrls = [];
+
+            for (let relatedUrl of relatedUrls) {
+              relatedFeedUrls.push(relatedUrl.url);
+            }
+
+            return relatedFeedUrls;
+          })
+        } else {
+          throw new errors.GeneralError('No related feedUrls found');
+        }
+
+      })
+      .catch(e => {
+        console.log(url);
+        console.log(e);
+      })
+
+    }
+
+
+  }
+
 }
 
 FeedUrlService.prototype.update = undefined;
