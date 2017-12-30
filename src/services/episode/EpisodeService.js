@@ -26,8 +26,7 @@ class EpisodeService extends SequelizeService {
       return this.Model.findOne({
         where: {
           mediaUrl: mediaUrl,
-        },
-        include: [Podcast]
+        }
       }).then(episode => {
         return episode;
       });
@@ -64,7 +63,6 @@ class EpisodeService extends SequelizeService {
   }
 
   findOrCreateEpisode(episode, podcastId) {
-    
     return this.Model.findOrCreate({
       where: {
         mediaUrl: episode.mediaUrl
@@ -103,6 +101,40 @@ class EpisodeService extends SequelizeService {
       console.log(podcastId);
       console.log(err);
     })
+  }
+
+  validateMediaUrl(mediaUrl, feedUrl) {
+    let PodcastService = require('../podcast/PodcastService');
+    PodcastService = new PodcastService();
+
+    return PodcastService.findPodcastByFeedUrl(feedUrl)
+      .then(podcast => {
+
+        return this.find({
+          sequelize: {
+            where: {
+              podcastId: podcast.id,
+              mediaUrl: mediaUrl
+            }
+          }
+        })
+          .then(episodes => {
+
+            if (episodes && episodes.length > 0) {
+              return true;
+            } else {
+              return false;
+            }
+          })
+
+      })
+      .catch(e => {
+        console.log('Error: Invalid media URL');
+        console.log(mediaUrl);
+        console.log(feedUrl);
+        return false;
+      });
+
   }
 
 }
