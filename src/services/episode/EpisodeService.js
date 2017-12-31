@@ -21,12 +21,14 @@ class EpisodeService extends SequelizeService {
     const {Podcast} = this.Models;
 
     if (typeof params.mediaUrl !== 'undefined' && params.mediaUrl.length > 0) {
+
       let mediaUrl = params.mediaUrl;
 
       return this.Model.findOne({
         where: {
           mediaUrl: mediaUrl,
-        }
+        },
+        include: [Podcast]
       }).then(episode => {
         return episode;
       });
