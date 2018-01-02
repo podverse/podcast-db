@@ -26,14 +26,15 @@ class FeedUrlService extends SequelizeService {
         where: {
           url: feedUrl
         },
-        defaults: Object.assign({}, feedUrl, {
+        defaults: Object.assign({
           podcastId: podcastId
-        })
+        }, feedUrl)
       })
       .then(() => {
         return this.Model.upsert({
           isAuthority: isAuthority,
-          url: feedUrl
+          url: feedUrl,
+          podcastId: podcastId
         })
       })
 
