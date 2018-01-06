@@ -47,6 +47,10 @@ function parseFeed (feedUrl, params = {}) {
     });
 
     feedParser.on('meta', function (meta) {
+      if (!meta) {
+        stream.emit('error');
+      }
+
       parsedPodcast = meta;
     });
 
@@ -83,7 +87,7 @@ function parseFeed (feedUrl, params = {}) {
 
       parsedPodcast.totalAvailableEpisodes = parsedEpisodes.length;
 
-      saveParsedFeedToDatabase(parsedPodcast, parsedEpisodes, feedUrl, resolve, reject);
+      return saveParsedFeedToDatabase(parsedPodcast, parsedEpisodes, feedUrl, resolve, reject);
 
     }
 
@@ -137,8 +141,9 @@ function saveParsedFeedToDatabase (parsedPodcast, parsedEpisodes, feedUrl, resol
                   return EpisodeService.findOrCreateEpisode(prunedEpisode, podcastId);
                 })
                 .catch(e => {
-                  console.log(ep.title);
-                  console.log(ep.enclosures[0].url);
+                  console.log('create episode failed');
+                  console.log('ep.title', ep.title);
+                  console.log('ep.enclosures[0].url', ep.enclosures[0].url);
                   reject(new errors.GeneralError(e));
                 });
               }, Promise.resolve());
@@ -147,6 +152,9 @@ function saveParsedFeedToDatabase (parsedPodcast, parsedEpisodes, feedUrl, resol
 
     })
     .then(() => {
+      console.log('Parsed successfully:')
+      console.log(parsedPodcast.title);
+      console.log(feedUrl);
       resolve();
     })
     .catch((e) => {
