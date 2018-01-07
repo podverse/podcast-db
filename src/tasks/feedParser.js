@@ -1,5 +1,7 @@
 const
     FeedParser = require('feedparser'),
+    present = require('present'),
+    {logTime} = require('../helpers.js'),
     request = require('request'),
     errors = require('feathers-errors'),
     sqlEngineFactory = require('../repositories/sequelize/engineFactory.js'),
@@ -24,6 +26,10 @@ function parseFeed (feedUrl, params = {}) {
 
   return new Promise ((resolve, reject) => {
 
+    let time = present();
+
+    time = logTime('In parseFeed', time);
+
     let jsonString = '',
     parsedEpisodes = [],
     parsedPodcast = {};
@@ -36,6 +42,8 @@ function parseFeed (feedUrl, params = {}) {
           req = request(feedUrl, options);
 
     req.on('response', function (response) {
+      time = logTime('In parseFeed on request response', time);
+
       let stream = this;
 
       if (response.statusCode != 200) {
@@ -47,6 +55,8 @@ function parseFeed (feedUrl, params = {}) {
     });
 
     feedParser.on('meta', function (meta) {
+      time = logTime('In parseFeed feedParser on meta', time);
+
       if (!meta) {
         stream.emit('error');
       }
@@ -69,12 +79,17 @@ function parseFeed (feedUrl, params = {}) {
     });
 
     req.on('error', function (e) {
+      time = logTime('In parseFeed feedParser on error', time);
+
       console.log('feedUrl', feedUrl);
       console.log(e);
       reject(e);
     });
 
-    feedParser.on('end', done);
+    feedParser.on('end', function () {
+      time = logTime('In parseFeed feedParser on end', time);
+      done();
+    });
 
     function done () {
 
@@ -99,6 +114,10 @@ function parseFeed (feedUrl, params = {}) {
 //       it has isAuthority == true...
 function saveParsedFeedToDatabase (parsedPodcast, parsedEpisodes, feedUrl, resolve, reject) {
 
+  let time = present();
+
+  time = logTime('In saveParsedFeedToDatabase', time);
+
   const {Episode, Podcast} = Models;
 
   // Reduce the episodes array to 10000 items, in case someone maliciously tries
@@ -111,11 +130,17 @@ function saveParsedFeedToDatabase (parsedPodcast, parsedEpisodes, feedUrl, resol
   return PodcastService.findOrCreatePodcastFromParsing(parsedPodcast)
     .then(podcastId => {
 
+      time = logTime('In PodcastService.findOrCreatePodcastFromParsing then', time);
+
       return FeedUrlService.findOrCreateFeedUrl(feedUrl, podcastId, true)
         .then(() => {
 
+          time = logTime('In FeedUrlService.findOrCreateFeedUrl then', time);
+
           return EpisodeService.setAllEpisodesToNotPublic(podcastId)
             .then(() => {
+
+              time = logTime('In EpisodeService.setAllEpisodesToNotPublic then', time);
 
               return promiseChain = parsedEpisodes.reduce((promise, ep) => {
                 if (!ep.enclosures || !ep.enclosures[0] || !ep.enclosures[0].url) {
@@ -152,12 +177,13 @@ function saveParsedFeedToDatabase (parsedPodcast, parsedEpisodes, feedUrl, resol
 
     })
     .then(() => {
-      console.log('Parsed successfully:')
+      time = logTime('Parsed successfully', time);
       console.log(parsedPodcast.title);
       console.log(feedUrl);
       resolve();
     })
     .catch((e) => {
+      time = logTime('In saveParsedFeedToDatabase catch', time);
       reject(new errors.GeneralError(e));
     })
 
