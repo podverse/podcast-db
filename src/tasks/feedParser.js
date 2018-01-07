@@ -79,9 +79,15 @@ function parseFeed (feedUrl, params = {}) {
     });
 
     req.on('error', function (e) {
-      time = logTime('In parseFeed feedParser on error', time);
+      time = logTime('In parseFeed req on error', time);
 
       console.log('feedUrl', feedUrl);
+      console.log(e);
+      reject(e);
+    });
+
+    feedParser.on('error', function (e) {
+      time = logTime('In parseFeed feedParser on error', time);
       console.log(e);
       reject(e);
     });
