@@ -148,9 +148,11 @@ function saveParsedFeedToDatabase (parsedPodcast, parsedEpisodes, feedUrl, resol
 
               time = logTime('In EpisodeService.setAllEpisodesToNotPublic then', time);
 
-              return promiseChain = parsedEpisodes.reduce((promise, ep) => {
+              let promises = [];
+
+              for (ep of parsedEpisodes) {
                 if (!ep.enclosures || !ep.enclosures[0] || !ep.enclosures[0].url) {
-                  return promise
+                  continue
                 }
 
                 // NOTE: in rare cases a podcast feed may have multiple enclosures. The
@@ -167,9 +169,15 @@ function saveParsedFeedToDatabase (parsedPodcast, parsedEpisodes, feedUrl, resol
                   ep.enclosures.push(audioEnclosure);
                 }
 
-                return promise.then(() => {
-                  let prunedEpisode = pruneEpisode(ep);
-                  return EpisodeService.findOrCreateEpisode(prunedEpisode, podcastId);
+                let prunedEpisode = pruneEpisode(ep);
+                let promise = EpisodeService.findOrCreateEpisode(prunedEpisode, podcastId);
+                promises.push(promise);
+
+              }
+
+              return Promise.all(promises)
+                .then(() => {
+                  resolve();
                 })
                 .catch(e => {
                   console.log('create episode failed');
@@ -177,10 +185,8 @@ function saveParsedFeedToDatabase (parsedPodcast, parsedEpisodes, feedUrl, resol
                   console.log('ep.enclosures[0].url', ep.enclosures[0].url);
                   reject(new errors.GeneralError(e));
                 });
-              }, Promise.resolve());
-            });
-        })
-
+            })
+          });
     })
     .then(() => {
       time = logTime('Parsed successfully', time);
