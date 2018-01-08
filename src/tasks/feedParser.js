@@ -108,7 +108,7 @@ function parseFeed (feedUrl, params = {}) {
 
       parsedPodcast.totalAvailableEpisodes = parsedEpisodes.length;
 
-      return saveParsedFeedToDatabase(parsedPodcast, parsedEpisodes, feedUrl, resolve, reject);
+      saveParsedFeedToDatabase(parsedPodcast, parsedEpisodes, feedUrl, resolve, reject);
 
     }
 
