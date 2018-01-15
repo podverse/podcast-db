@@ -137,7 +137,7 @@ class FeedUrlService extends SequelizeService {
 
       })
       .catch(e => {
-        console.log(url);
+        console.log(urls);
         console.log(e);
       })
 
