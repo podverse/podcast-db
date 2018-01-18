@@ -38,7 +38,7 @@ class PodcastService extends SequelizeService {
     if (typeof params.query !== 'undefined' && typeof params.query.title !== 'undefined' && params.query.title.length > 0) {
       let title = params.query.title || '';
       params.sequelize = {
-        attributes: ['id', 'title'],
+        attributes: ['id', 'title', 'categories', 'imageUrl', 'author', 'lastPubDate', 'lastEpisodeTitle'],
         where: ['title ILIKE ?', '%' + title + '%']
       }
       return super.find(params);
