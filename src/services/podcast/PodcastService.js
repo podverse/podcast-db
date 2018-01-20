@@ -20,11 +20,13 @@ class PodcastService extends SequelizeService {
   get (id, params={}) {
     const {Episode} = this.Models;
 
-    params.sequelize = {
-      include: [{
-        model: Episode,
-        attributes: ['id', 'title', 'mediaUrl', 'pubDate', 'summary', 'isPublic']
-      }]
+    if (!params.excludeEpisodes) {
+      params.sequelize = {
+        include: [{
+          model: Episode,
+          attributes: ['id', 'title', 'mediaUrl', 'pubDate', 'summary', 'isPublic']
+        }]
+      }
     }
 
     return super.get(id, params);
@@ -42,7 +44,6 @@ class PodcastService extends SequelizeService {
         where: ['title ILIKE ?', '%' + title + '%']
       }
       return super.find(params);
-
     }
     else {
       // TODO: how do we show a 404 not found page here when the user navs to /podcasts/?
