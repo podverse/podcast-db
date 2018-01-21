@@ -34,14 +34,21 @@ class PodcastService extends SequelizeService {
   }
 
   find (params={}) {
-    const {Episode} = this.Models;
+    const {FeedUrl} = this.Models;
 
     // Fuzzy match search for podcasts by title
     if (typeof params.query !== 'undefined' && typeof params.query.title !== 'undefined' && params.query.title.length > 0) {
       let title = params.query.title || '';
       params.sequelize = {
         attributes: ['id', 'title', 'categories', 'imageUrl', 'author', 'lastPubDate', 'lastEpisodeTitle'],
-        where: ['title ILIKE ?', '%' + title + '%']
+        where: ['title ILIKE ?', '%' + title + '%'],
+        include: [{
+          model: FeedUrl,
+          attributes: ['url'],
+          where: {
+            isAuthority: true
+          }
+        }]
       }
       return super.find(params);
     }
