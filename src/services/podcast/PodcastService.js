@@ -47,7 +47,8 @@ class PodcastService extends SequelizeService {
           attributes: ['url'],
           where: {
             isAuthority: true
-          }
+          },
+          required: false
         }]
       }
       return super.find(params);
