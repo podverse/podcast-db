@@ -88,12 +88,34 @@ class FeedUrlService extends SequelizeService {
     .catch(e => {
       console.log(podcastId);
       console.log(e);
-    })
+    });
+
   }
 
-  findAllRelatedFeedUrls(urls) {
+  findRelatedFeedUrlsByPodcastIds(podcastIds) {
+    const query = {
+      sequelize: {
+        where: {
+          podcastId: podcastIds
+        }
+      }
+    };
 
-    if (!urls || (urls && urls.length < 1)) {
+    return this.find(query)
+    .then(relatedUrls => {
+      let relatedFeedUrls = [];
+
+      for (let relatedUrl of relatedUrls) {
+        relatedFeedUrls.push(relatedUrl.url);
+      }
+
+      return relatedFeedUrls;
+    });
+  }
+
+  findAllRelatedFeedUrls(podcastIds, urls) {
+
+    if ((!podcastIds && podcastIds.length < 1) && (!urls || (urls && urls.length < 1))) {
 
       return new Promise((resolve, reject) => {
         resolve([]);
@@ -101,48 +123,53 @@ class FeedUrlService extends SequelizeService {
 
     } else {
 
-      return this.find({
-        sequelize: {
-          where: {
-            url: urls
-          }
-        }
-      })
-      .then(feedUrls => {
-
-        if (feedUrls && feedUrls.length > 0) {
-
-          let podcastId = feedUrls[0].podcastId;
-
-          return this.find({
-            sequelize: {
-              where: {
-                podcastId: podcastId
-              }
-            }
-          })
-          .then(relatedUrls => {
-
-            let relatedFeedUrls = [];
-
-            for (let relatedUrl of relatedUrls) {
-              relatedFeedUrls.push(relatedUrl.url);
-            }
-
+      if (podcastIds.length > 0) {
+        return this.findRelatedFeedUrlsByPodcastIds(podcastIds)
+          .then(relatedFeedUrls => {
             return relatedFeedUrls;
           })
-        } else {
-          throw new errors.GeneralError('No related feedUrls found');
-        }
+          .catch(e => {
+            console.log('podcastIds', podcastIds);
+            console.log('urls', urls);
+            console.log(e);
+          });
+      } else {
+        const query = {
+          sequelize: {
+            where: {
+              url: urls
+            }
+          }
+        };
 
-      })
-      .catch(e => {
-        console.log(urls);
-        console.log(e);
-      })
+        return this.find(query)
+          .then(feedUrls => {
+            if (feedUrls && feedUrls.length > 0) {
+
+              let podcastIds = new Set();
+
+              for (let feedUrl of feedUrls) {
+                podcastIds.add(feedUrl.podcastId);
+              }
+
+              let podcastIdsArray = Array.from(podcastIds);
+
+              return this.findRelatedFeedUrlsByPodcastIds(podcastIdsArray)
+                .then(relatedFeedUrls => {
+                  return relatedFeedUrls;
+                });
+            } else {
+              throw new errors.GeneralError('No related feedUrls found');
+            }
+          })
+          .catch(e => {
+            console.log('podcastIds', podcastIds);
+            console.log('urls', urls);
+            console.log(e);
+          });
+      }
 
     }
-
 
   }
 
