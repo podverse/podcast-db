@@ -75,6 +75,7 @@ class EpisodeService extends SequelizeService {
     })
     .then(() => {
       return this.Model.upsert({
+        podcastId: podcastId,
         mediaUrl: episode.mediaUrl,
         imageUrl: episode.imageUrl,
         title: episode.title,
@@ -84,7 +85,7 @@ class EpisodeService extends SequelizeService {
         mediaBytes: episode.mediaBytes,
         mediaType: episode.mediaType,
         pubDate: episode.pubDate,
-        isPublic: true
+        isPublic: true,
       })
     })
     .catch(err => {
