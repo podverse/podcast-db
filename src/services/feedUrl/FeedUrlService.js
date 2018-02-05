@@ -158,8 +158,6 @@ class FeedUrlService extends SequelizeService {
                 .then(relatedFeedUrls => {
                   return relatedFeedUrls;
                 });
-            } else {
-              throw new errors.GeneralError('No related feedUrls found');
             }
           })
           .catch(e => {
