@@ -1,11 +1,10 @@
 const
-    sqlEngineFactory = require('../../repositories/sequelize/engineFactory.js'),
+    sqlEngine = require('../../repositories/sequelize/engineInstance.js'),
     modelFactory = require('../../repositories/sequelize/models'),
     SequelizeService = require('feathers-sequelize').Service,
     errors = require('feathers-errors'),
     {postgresUri} = require('../../config');
 
-const sqlEngine = new sqlEngineFactory({uri: postgresUri});
 const Models = modelFactory(sqlEngine);
 
 class PodcastService extends SequelizeService {

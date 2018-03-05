@@ -24,7 +24,7 @@ function parseNextFeed () {
 
         console.log('Begin parsing:', arr[0]);
 
-        return parseFeed(arr[0], arr[1]) // feedUrl, params
+        parseFeed(arr[0], arr[1]) // feedUrl, params
           .then(() => {
 
             time = logTime('In parseFeed then', time);
@@ -49,6 +49,7 @@ function parseNextFeed () {
     })
     .catch(err => {
       console.log(err);
+      return;
     })
 }
 

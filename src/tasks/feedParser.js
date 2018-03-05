@@ -4,7 +4,7 @@ const
     {logTime} = require('../helpers.js'),
     request = require('request'),
     errors = require('feathers-errors'),
-    sqlEngineFactory = require('../repositories/sequelize/engineFactory.js'),
+    sqlEngine = require('../repositories/sequelize/engineInstance.js'),
     modelFactory = require('../repositories/sequelize/models'),
     {deleteSQSMessage} = require('./sqsQueue'),
     {postgresUri} = require('../config'),
@@ -19,7 +19,6 @@ PodcastService = new PodcastService();
 EpisodeService = new EpisodeService();
 FeedUrlService = new FeedUrlService();
 
-const sqlEngine = new sqlEngineFactory({uri: postgresUri});
 const Models = modelFactory(sqlEngine);
 
 function parseFeed (feedUrl, params = {}) {
@@ -133,17 +132,17 @@ function saveParsedFeedToDatabase (parsedPodcast, parsedEpisodes, feedUrl, resol
   // Override fields as needed for specific podcasts
   parsedPodcast = podcastOverride(parsedPodcast);
 
-  return PodcastService.findOrCreatePodcastFromParsing(parsedPodcast)
+  PodcastService.findOrCreatePodcastFromParsing(parsedPodcast)
     .then(podcastId => {
 
       time = logTime('In PodcastService.findOrCreatePodcastFromParsing then', time);
 
-      return FeedUrlService.findOrCreateFeedUrl(feedUrl, podcastId, true)
+      FeedUrlService.findOrCreateFeedUrl(feedUrl, podcastId, true)
         .then(() => {
 
           time = logTime('In FeedUrlService.findOrCreateFeedUrl then', time);
 
-          return EpisodeService.setAllEpisodesToNotPublic(podcastId)
+          EpisodeService.setAllEpisodesToNotPublic(podcastId)
             .then(() => {
 
               time = logTime('In EpisodeService.setAllEpisodesToNotPublic then', time);
@@ -178,12 +177,14 @@ function saveParsedFeedToDatabase (parsedPodcast, parsedEpisodes, feedUrl, resol
               return Promise.all(promises)
                 .then(() => {
                   resolve();
+                  return;
                 })
                 .catch(e => {
                   console.log('create episode failed');
                   console.log('ep.title', ep.title);
                   console.log('ep.enclosures[0].url', ep.enclosures[0].url);
                   reject(new errors.GeneralError(e));
+                  return;
                 });
             })
           });
@@ -193,10 +194,12 @@ function saveParsedFeedToDatabase (parsedPodcast, parsedEpisodes, feedUrl, resol
       console.log(parsedPodcast.title);
       console.log(feedUrl);
       resolve();
+      return;
     })
     .catch((e) => {
       time = logTime('In saveParsedFeedToDatabase catch', time);
       reject(new errors.GeneralError(e));
+      return;
     })
 
 }

@@ -1,10 +1,9 @@
 const
-    sqlEngineFactory = require('../repositories/sequelize/engineFactory.js'),
+    sqlEngine = require('../repositories/sequelize/engineInstance.js'),
     modelFactory = require('../repositories/sequelize/models'),
     {postgresUri, queueUrl, awsRegion} = require('../config'),
     aws = require('aws-sdk');
 
-const sqlEngine = new sqlEngineFactory({uri: postgresUri});
 const Models = modelFactory(sqlEngine);
 
 aws.config.update({region: awsRegion});

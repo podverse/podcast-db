@@ -1,14 +1,16 @@
 const present = require('present');
 
 function logTime(message, previousTime) {
-  console.log(`${message}:`);
+  if (process.env.includeTimeLogging) {
+    console.log(`${message}:`);
 
-  let currentTime = present();
-  let elapsedTime = currentTime - previousTime;
+    let currentTime = present();
+    let elapsedTime = currentTime - previousTime;
 
-  console.log(`Elapsed Time: ${elapsedTime}`);
+    console.log(`Elapsed Time: ${elapsedTime}`);
 
-  return currentTime;
+    return currentTime;
+  }
 }
 
 module.exports = {
