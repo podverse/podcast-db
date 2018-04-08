@@ -3,7 +3,8 @@ const
     modelFactory = require('../../repositories/sequelize/models'),
     SequelizeService = require('feathers-sequelize').Service,
     errors = require('feathers-errors'),
-    {postgresUri} = require('../../config');
+    {postgresUri} = require('../../config'), 
+    shortid = require('shortid');
 
 const Models = modelFactory(sqlEngine);
 
@@ -59,7 +60,7 @@ class PodcastService extends SequelizeService {
   }
 
   findOrCreatePodcastFromParsing (parsedPodcast, podcastId) {
-
+    
     let podcast = parsedPodcast;
 
     return this.Model.findOrCreate({
@@ -67,6 +68,7 @@ class PodcastService extends SequelizeService {
         id: podcastId
       },
       default: {
+        id: shortid.generate(),
         title: podcast.title
       }
     })
