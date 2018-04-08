@@ -24,7 +24,7 @@ function parseNextFeed () {
 
         console.log('Begin parsing:', arr[0]);
 
-        parseFeed(arr[0], arr[1]) // feedUrl, params
+        parseFeed(arr[0], arr[1]) // feedUrl, podcastId
           .then(() => {
 
             time = logTime('In parseFeed then', time);

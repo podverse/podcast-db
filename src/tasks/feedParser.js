@@ -21,7 +21,7 @@ FeedUrlService = new FeedUrlService();
 
 const Models = modelFactory(sqlEngine);
 
-function parseFeed (feedUrl, params = {}) {
+function parseFeed (feedUrl, podcastId) {
 
   return new Promise ((resolve, reject) => {
 
@@ -107,7 +107,7 @@ function parseFeed (feedUrl, params = {}) {
 
       parsedPodcast.totalAvailableEpisodes = parsedEpisodes.length;
 
-      saveParsedFeedToDatabase(parsedPodcast, parsedEpisodes, feedUrl, resolve, reject);
+      saveParsedFeedToDatabase(podcastId, parsedPodcast, parsedEpisodes, feedUrl, resolve, reject);
 
     }
 
@@ -117,7 +117,7 @@ function parseFeed (feedUrl, params = {}) {
 
 // TODO: if a feedUrl does not already have a podcast associated with it AND
 //       it has isAuthority == true...
-function saveParsedFeedToDatabase (parsedPodcast, parsedEpisodes, feedUrl, resolve, reject) {
+function saveParsedFeedToDatabase (podcastId, parsedPodcast, parsedEpisodes, feedUrl, resolve, reject) {
 
   let time = present();
 
@@ -132,7 +132,7 @@ function saveParsedFeedToDatabase (parsedPodcast, parsedEpisodes, feedUrl, resol
   // Override fields as needed for specific podcasts
   parsedPodcast = podcastOverride(parsedPodcast);
 
-  PodcastService.findOrCreatePodcastFromParsing(parsedPodcast)
+  PodcastService.findOrCreatePodcastFromParsing(parsedPodcast, podcastId)
     .then(podcastId => {
 
       time = logTime('In PodcastService.findOrCreatePodcastFromParsing then', time);

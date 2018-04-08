@@ -15,10 +15,11 @@ function addFeedUrlsToSQSParsingQueue(params = {}) {
     purgeSQSFeedQueue(resolve, reject)
   })
     .then(() => {
-      let {FeedUrl} = Models;
+      let {FeedUrl, Podcast} = Models;
 
       let queryObj = {
         attributes: ['url'],
+        include: Podcast,
         where: {
           isAuthority: true
         }
@@ -27,9 +28,21 @@ function addFeedUrlsToSQSParsingQueue(params = {}) {
       return FeedUrl.findAll(queryObj)
         .then(feedUrls => {
 
-          let urls = [];
+          let attributes = [];
+
           for (feedUrl of feedUrls) {
-            urls.push(feedUrl.url);
+            let attribute = {
+              "feedUrl": {
+                DataType: "String",
+                StringValue: feedUrl.url
+              },
+              "podcastId": {
+                DataType: "String",
+                StringValue: feedUrl.podcast.id
+              }
+            }
+
+            attributes.push(attribute);
           }
 
           // AWS SQS has a max of 10 messages per batch message. This code breaks
@@ -38,15 +51,16 @@ function addFeedUrlsToSQSParsingQueue(params = {}) {
           let entryChunks = [];
           let tempChunk = [];
 
-          for (let [index, feedUrl] of urls.entries()) {
+          for (let [index, attr] of attributes.entries()) {
             let entry = {
               Id: String(index),
-              MessageBody: feedUrl
+              MessageAttributes: attr,
+              MessageBody: 'required message body – podverse rules'
             }
 
             tempChunk.push(entry);
 
-            if ((index + 1) % 10 === 0 || index === urls.length - 1) {
+            if ((index + 1) % 10 === 0 || index === attributes.length - 1) {
               entryChunks.push(tempChunk);
               tempChunk = [];
             }
@@ -84,9 +98,8 @@ function parseNextFeedFromQueue () {
 
     sqs.receiveMessage(params, (err, data) => {
 
-      console.log(err);
-
       if (err) {
+        console.log(err);
         reject(err);
         return;
       }
@@ -97,13 +110,14 @@ function parseNextFeedFromQueue () {
         return;
       }
 
-      let parseParams = {};
       let message = data.Messages[0];
       let receiptHandle = message.ReceiptHandle;
 
-      let feedUrl = message.Body;
+      let attributes = message.MessageAttributes;
+      let feedUrl = attributes.feedUrl.StringValue;
+      let podcastId = attributes.podcastId.StringValue;
 
-      resolve([feedUrl, parseParams, receiptHandle])
+      resolve([feedUrl, podcastId, receiptHandle])
     });
 
   });

@@ -23,7 +23,7 @@ class PodcastService extends SequelizeService {
       params.sequelize = {
         include: [{
           model: Episode,
-          attributes: ['id', 'title', 'mediaUrl', 'pubDate', 'summary', 'isPublic', 'duration'],
+          attributes: ['id', 'title', 'mediaUrl', 'pubDate', 'summary', 'isPublic', 'duration']
         }]
       }
     }
@@ -58,13 +58,13 @@ class PodcastService extends SequelizeService {
     }
   }
 
-  findOrCreatePodcastFromParsing (parsedPodcast) {
+  findOrCreatePodcastFromParsing (parsedPodcast, podcastId) {
 
     let podcast = parsedPodcast;
 
     return this.Model.findOrCreate({
       where: {
-        title: podcast.title
+        id: podcastId
       },
       default: {
         title: podcast.title
