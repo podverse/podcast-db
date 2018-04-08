@@ -3,8 +3,7 @@ const
     modelFactory = require('../../repositories/sequelize/models'),
     SequelizeService = require('feathers-sequelize').Service,
     errors = require('feathers-errors'),
-    {postgresUri} = require('../../config'), 
-    shortid = require('shortid');
+    {postgresUri} = require('../../config');
 
 const Models = modelFactory(sqlEngine);
 
@@ -68,7 +67,6 @@ class PodcastService extends SequelizeService {
         id: podcastId
       },
       default: {
-        id: shortid.generate(),
         title: podcast.title
       }
     })

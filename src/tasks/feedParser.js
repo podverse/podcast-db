@@ -25,6 +25,12 @@ function parseFeed (feedUrl, podcastId) {
 
   return new Promise ((resolve, reject) => {
 
+    if (!podcastId) {
+      console.log('INVALID FEED - A podcastId must be provided.');
+      reject();
+      return;
+    }
+
     let time = present();
 
     time = logTime('In parseFeed', time);
