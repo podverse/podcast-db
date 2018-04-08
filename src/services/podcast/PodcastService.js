@@ -73,9 +73,11 @@ class PodcastService extends SequelizeService {
     .then((podcastArray) => {
       podcast.id = podcastArray[0].id;
 
+      let image = podcast.image || {};
+
       return this.Model.upsert({
         id: podcast.id,
-        imageUrl: podcast.image.url,
+        imageUrl: image.url,
         summary: podcast.description,
         title: podcast.title,
         author: podcast.author,
