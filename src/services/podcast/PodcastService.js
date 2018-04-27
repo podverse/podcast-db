@@ -2,8 +2,7 @@ const
     sqlEngine = require('../../repositories/sequelize/engineInstance.js'),
     modelFactory = require('../../repositories/sequelize/models'),
     SequelizeService = require('feathers-sequelize').Service,
-    errors = require('feathers-errors'),
-    {postgresUri} = require('../../config');
+    errors = require('feathers-errors');
 
 const Models = modelFactory(sqlEngine);
 

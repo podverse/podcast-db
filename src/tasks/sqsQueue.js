@@ -1,7 +1,7 @@
 const
     sqlEngine = require('../repositories/sequelize/engineInstance.js'),
     modelFactory = require('../repositories/sequelize/models'),
-    {postgresUri, queueUrl, awsRegion} = require('../config'),
+    {queueUrl, awsRegion} = require('../config'),
     aws = require('aws-sdk');
 
 const Models = modelFactory(sqlEngine);

@@ -7,7 +7,6 @@ const
     sqlEngine = require('../repositories/sequelize/engineInstance.js'),
     modelFactory = require('../repositories/sequelize/models'),
     {deleteSQSMessage} = require('./sqsQueue'),
-    {postgresUri} = require('../config'),
     {podcastOverride} = require('../custom-overrides/podcastOverride'),
     _ = require('lodash');
 
