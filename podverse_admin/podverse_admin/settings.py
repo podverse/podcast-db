@@ -77,8 +77,8 @@ WSGI_APPLICATION = 'podverse_admin.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'postgres',
-        'USER': 'postgres',
+        'NAME': '',
+        'USER': '',
         'PASSWORD': '',
         'HOST': '',
         'PORT': ''
