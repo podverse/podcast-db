@@ -8,6 +8,7 @@
 from django.db import models
 from django.contrib import admin
 from django.forms import Textarea, TextInput
+from datetime import datetime
 
 
 class Sequelizemeta(models.Model):
@@ -158,8 +159,8 @@ class Episodes(models.Model):
 class Feedurls(models.Model):
     url = models.TextField(primary_key=True)
     isauthority = models.NullBooleanField(db_column='isAuthority')  # Field name made lowercase.
-    datecreated = models.DateTimeField(db_column='dateCreated')  # Field name made lowercase.
-    lastupdated = models.DateTimeField(db_column='lastUpdated')  # Field name made lowercase.
+    datecreated = models.DateTimeField(default=datetime.now, db_column='dateCreated')  # Field name made lowercase.
+    lastupdated = models.DateTimeField(default=datetime.now, db_column='lastUpdated')  # Field name made lowercase.
     podcastid = models.ForeignKey('Podcasts', models.DO_NOTHING, db_column='podcastId', blank=True, null=True)  # Field name made lowercase.
 
     class Meta:
@@ -247,8 +248,8 @@ class Podcasts(models.Model):
     pastmonthtotaluniquepageviews = models.IntegerField(db_column='pastMonthTotalUniquePageviews', blank=True, null=True)  # Field name made lowercase.
     pastyeartotaluniquepageviews = models.IntegerField(db_column='pastYearTotalUniquePageviews', blank=True, null=True)  # Field name made lowercase.
     alltimetotaluniquepageviews = models.IntegerField(db_column='allTimeTotalUniquePageviews', blank=True, null=True)  # Field name made lowercase.
-    datecreated = models.DateTimeField(db_column='dateCreated')  # Field name made lowercase.
-    lastupdated = models.DateTimeField(db_column='lastUpdated')  # Field name made lowercase.
+    datecreated = models.DateTimeField(default=datetime.now, db_column='dateCreated')  # Field name made lowercase.
+    lastupdated = models.DateTimeField(default=datetime.now, db_column='lastUpdated')  # Field name made lowercase.
 
     class Meta:
         managed = False
