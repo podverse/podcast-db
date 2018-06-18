@@ -1,6 +1,6 @@
 const sqlEngineFactory = require('./engineFactory'),
-      {postgresUri} = require('../../config');
+      {dbConfig} = require('../../config');
 
-const sqlEngine = new sqlEngineFactory({uri: postgresUri});
+const sqlEngine = new sqlEngineFactory(dbConfig);
 
 module.exports = sqlEngine;

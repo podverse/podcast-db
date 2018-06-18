@@ -1,13 +1,13 @@
 const
     SqlEngine = require('../src/repositories/sequelize/engineFactory'),
     registerModels = require('../src/repositories/sequelize/models'),
-    {postgresUri} = require('../src/config');
+    {dbConfig} = require('../src/config');
 
 
 function configureDatabaseModels (resolve) {
 
   beforeEach(function (done) {
-    this._sqlEngine = new SqlEngine({uri: postgresUri});
+    this._sqlEngine = new SqlEngine(dbConfig);
     const Models = registerModels(this._sqlEngine);
 
     this._sqlEngine.sync()
