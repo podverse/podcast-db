@@ -2,7 +2,7 @@
 const isCi = require('is-ci');
 
 const dbConfig = {
-  host: process.env.DB_HOST || 'podverse_db',
+  host: process.env.DB_HOST || '127.0.0.1',
   port: process.env.DB_PORT || '5432',
   database: process.env.DB_DATABASE || 'postgres',
   username: process.env.DB_USER || 'postgres',
