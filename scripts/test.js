@@ -8,15 +8,13 @@ if (!isCi) {
   mochaArgs.push('-w', '--colors');
 }
 
-if (process.env.NODE_ENV != 'local') {
+if (process.env.NODE_ENV == 'prod' || process.env.NODE_ENV == 'local' || process.env.NODE_ENV == 'test') {
   mochaArgs.push('/tmp/test/setup.js')
   mochaArgs.push('/tmp/test/');
 } else {
   mochaArgs.push('test/setup.js')
   mochaArgs.push('test/');
 }
-
-
 
 const mocha = spawn('mocha', mochaArgs);
 
@@ -28,6 +26,5 @@ mocha.on('close', (code) => {
 });
 
 mocha.on('error', err => {
-  console.log('mocha error');
   console.log(err);
 });
