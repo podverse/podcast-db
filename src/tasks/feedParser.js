@@ -8,7 +8,8 @@ const
     modelFactory = require('../repositories/sequelize/models'),
     {deleteSQSMessage} = require('./sqsQueue'),
     {podcastOverride} = require('../custom-overrides/podcastOverride'),
-    _ = require('lodash');
+    _ = require('lodash'),
+    shortid = require('shortid');
 
 let PodcastService = require('../services/podcast/PodcastService.js'),
     EpisodeService = require('../services/episode/EpisodeService.js'),
@@ -21,6 +22,10 @@ FeedUrlService = new FeedUrlService();
 const Models = modelFactory(sqlEngine);
 
 function parseFeed (feedUrl, podcastId) {
+
+  if (process.env.NODE_ENV === 'local') {
+    podcastId = shortid();
+  }
 
   return new Promise ((resolve, reject) => {
 
