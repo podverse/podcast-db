@@ -1,3 +1,4 @@
+#!/usr/local/bin/node
 const spawn = require('child_process').spawn;
 const isCi = require('is-ci');
 
@@ -7,8 +8,15 @@ if (!isCi) {
   mochaArgs.push('-w', '--colors');
 }
 
-mochaArgs.push('test/setup.js')
-mochaArgs.push('test/');
+if (process.env.NODE_ENV != 'local') {
+  mochaArgs.push('/tmp/test/setup.js')
+  mochaArgs.push('/tmp/test/');
+} else {
+  mochaArgs.push('test/setup.js')
+  mochaArgs.push('test/');
+}
+
+
 
 const mocha = spawn('mocha', mochaArgs);
 
@@ -17,4 +25,9 @@ mocha.stderr.pipe(process.stderr);
 
 mocha.on('close', (code) => {
   process.exit(code);
+});
+
+mocha.on('error', err => {
+  console.log('mocha error');
+  console.log(err);
 });
