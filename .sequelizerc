@@ -1,5 +1,5 @@
 const path = require('path');
-const {dbConfig} = require('./src/config.js'),
+const {dbConfig} = require('./src/config.js');
 const PATH = 'src/repositories/sequelize';
 
 module.exports = {
