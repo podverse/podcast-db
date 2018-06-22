@@ -11,8 +11,8 @@ const dbConfig = {
   logging: process.env.DB_LOGGING || false
 };
 
-const queueUrl = process.env.QUEUE_URL || 'https://sqs.us-east-1.amazonaws.com/088242326555/podcast_db_to_be_parsed_dev';
-const awsRegion = 'us-east-1';
+const queueUrl = process.env.AWS_QUEUE_URL;
+const awsRegion = process.env.AWS_REGION;
 
 module.exports = {
   dbConfig,
