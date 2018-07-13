@@ -47,36 +47,4 @@ describe('PodcastService', function () {
 
   });
 
-  it('should be able to retrieve all podcasts with expected attributes', function (done) {
-
-    this.Models.Podcast.create({
-        title: 'Some kind of title',
-        imageUrl: 'http://example.com/img'
-      })
-      .then(() =>{
-        this.Models.Podcast.create({
-          imageUrl: 'http://example.com/img2'
-        })
-        .then(() =>{
-          this.Models.Podcast.create({
-            imageUrl: 'http://example.com/img3'
-          })
-          .then(() => {
-            this.podcastSvc.retrieveAllPodcasts()
-              .then(podcasts => {
-                expect(podcasts.length).to.equal(3);
-                expect(podcasts[0].id).to.exist;
-                expect(podcasts[0].title).to.exist;
-                expect(podcasts[0].imageUrl).to.exist;
-                done();
-              });
-          })
-          .catch(e => {
-            console.log(e);
-          })
-
-        })
-      })
-  });
-
 });

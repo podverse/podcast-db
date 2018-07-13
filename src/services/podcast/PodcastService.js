@@ -97,15 +97,6 @@ class PodcastService extends SequelizeService {
     })
   }
 
-  retrieveAllPodcasts () {
-    return sqlEngine.query(`
-      SELECT p.title, p."imageUrl", p.id, p."lastEpisodeTitle", p."totalAvailableEpisodes", (
-        SELECT MAX("pubDate") FROM episodes WHERE "podcastId"=p.id
-      ) AS "lastEpisodePubDate"
-      FROM podcasts p;
-    `, { type: sqlEngine.QueryTypes.SELECT });
-  }
-
   findPodcastByFeedUrl(url) {
     const {FeedUrl} = this.Models;
 
