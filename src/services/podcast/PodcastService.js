@@ -122,8 +122,9 @@ class PodcastService extends SequelizeService {
 
 }
 
+PodcastService.prototype.create = undefined;
 PodcastService.prototype.update = undefined;
-PodcastService.prototype.remove = undefined;
 PodcastService.prototype.patch = undefined;
+PodcastService.prototype.remove = undefined;
 
 module.exports = PodcastService;
