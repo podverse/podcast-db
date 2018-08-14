@@ -17,23 +17,22 @@ class PodcastService extends SequelizeService {
 
   get(id, params = {}) {
     const { Episode } = this.Models;
-    let isPublic = params.isPublic || false;
 
     if (params.excludeEpisodes) {
-      return super.get(id, params);
+      return super.get(id, {});
     } else {
       return Episode.findAll({
         where: {
           podcastId: id,
-          isPublic: isPublic
+          isPublic: true
         },
         attributes: ['id', 'title', 'mediaUrl', 'pubDate', 'summary', 'isPublic', 'duration']
       })
         .then(episodes => {
-          return super.get(id, params)
+          return super.get(id, {})
             .then(podcast => {
-              podcast.episodes = episodes;
-              return podcast;
+              podcast.dataValues.episodes = episodes;
+              return podcast.dataValues;
             });
         })
     }
