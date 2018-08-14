@@ -10,18 +10,20 @@ module.exports = function (sequelizeEngine) {
   // Now relate them
   // ---------------
 
-  const {Podcast, Episode, FeedUrl} = models;
+  const { Podcast, Episode, FeedUrl } = models;
 
-  Podcast.hasMany(Episode);
+  Podcast.hasMany(Episode, { foreignKeyConstraint: true });
 
   Episode.belongsTo(Podcast, {
-    foreignKey: { allowNull: false }
+    foreignKey: { allowNull: false },
+    foreignKeyConstraint: true
   });
 
-  Podcast.hasMany(FeedUrl);
+  Podcast.hasMany(FeedUrl, { foreignKeyConstraint: true });
 
   FeedUrl.belongsTo(Podcast, {
-    foreignKey: { allowNull: false }
+    foreignKey: { allowNull: false },
+    foreignKeyConstraint: true
   });
 
   return models;
