@@ -1,0 +1,54 @@
+version: "2"
+
+volumes:
+  db-data: 
+
+services:
+
+  podverse_db:
+    image: postgres
+    container_name: podverse_db_old
+    ports: 
+      - '5432:5432'
+    env_file:
+      - ./config/podverse-db-old.env
+    # volumes:
+    #   - db-data:/mnt/podversedbvolume1
+
+  podcast_db:
+    image: podverse/podcast_db
+    container_name: podcast_db_old
+    env_file:
+      - ./config/podcast-db-old.env
+    depends_on:
+      - podverse_db
+    command: npm run migrate
+
+  # podcast_db_worker_old:
+  #   image: podverse/podcast_db
+  #   env_file:
+  #     - ./config/podcast-db-old.env
+  #   command: node /tmp/scripts/parseNextFeed.js
+
+  podverse_web:
+    image: podverse/podverse_web:1.1.16
+    container_name: podverse_web_old
+    ports:
+      - 8765:8080
+    env_file:
+      - ./config/podverse-web-old.env
+    depends_on: 
+      - podverse_db
+    command: npm run start
+    volumes:
+      - ./config/googleapi.jwt.keys.json:/tmp/src/services/googleapi/jwt.keys.json
+
+  # podverse_db_admin_old:
+  #   image: podverse/podverse_db_admin
+  #   ports: 
+  #     - 8000:8000
+  #   env_file:
+  #     - ./config/podverse-db-admin-old.env
+  #   depends_on:
+  #     - podverse_db_old
+  #   command: python manage.py runserver 0.0.0.0:8000

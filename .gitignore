@@ -2,3 +2,6 @@
 npm-debug.log
 .vscode/
 .boot/
+/config/podcast-db-old.env
+/config/podverse-db-old.env
+/config/podverse-web-old.env
