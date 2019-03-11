@@ -31,7 +31,7 @@ services:
   #   command: node /tmp/scripts/parseNextFeed.js
 
   podverse_web:
-    image: podverse/podverse_web:1.1.17
+    image: podverse/podverse_web:1.1.18
     container_name: podverse_web_old
     ports:
       - 8765:8080
